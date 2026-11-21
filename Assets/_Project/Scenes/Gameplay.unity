@@ -506,6 +506,8 @@ MonoBehaviour:
     m_Bits: 128
   multiShotSpreadAngle: 12
   projectileLifetime: 2.5
+  useObjectPooling: 1
+  prewarmCount: 40
 --- !u!1 &1739994253
 GameObject:
   m_ObjectHideFlags: 0
@@ -539,6 +541,8 @@ MonoBehaviour:
   enemyPrefab: {fileID: 5915802894080137474, guid: 66008cae8ea5e324cae79606168a33a2, type: 3}
   playerTransform: {fileID: 1745635148}
   mainCamera: {fileID: 519420031}
+  useObjectPooling: 1
+  prewarmCount: 80
   elapsedTime: 0
   activeEnemyCount: 0
   isSpawning: 1
@@ -572,6 +576,8 @@ GameObject:
   - component: {fileID: 1745635149}
   - component: {fileID: 1745635151}
   - component: {fileID: 1745635150}
+  - component: {fileID: 1745635152}
+  - component: {fileID: 1745635153}
   m_Layer: 6
   m_Name: Player
   m_TagString: Player
@@ -761,6 +767,142 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SurvivorGame.Systems.Health
   maxHealth: 100
   invincibilityDuration: 0.6
+--- !u!114 &1745635152
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1745635144}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bac3e69a385c12743a00d5cbe9f230b7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SurvivorGame.Player.PlayerExperience
+  baseExpToLevel: 30
+  expFlatIncreasePerLevel: 15
+  expMultiplierPerLevel: 1.15
+  magnetRadius: 2.5
+  collectRadius: 0.45
+  currentLevel: 1
+  currentExp: 0
+  expToNextLevel: 0
+--- !u!114 &1745635153
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1745635144}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b2cddab21805df146a349f06ff6e07ef, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SurvivorGame.Player.PlayerStats
+  weaponsContainer: {fileID: 39616247}
+  damageMultiplier: 1
+  cooldownMultiplier: 1
+--- !u!1 &1793102859
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1793102861}
+  - component: {fileID: 1793102860}
+  m_Layer: 0
+  m_Name: UpgradeManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1793102860
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1793102859}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c7cd88d7fe9c4ab47903d145cdbf9d73, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SurvivorGame.Systems.UpgradeManager
+  playerExperience: {fileID: 1745635152}
+  playerStats: {fileID: 1745635153}
+  weaponsContainer: {fileID: 39616247}
+  availablePassives:
+  - {fileID: 11400000, guid: de06b4e6666ab34488e4e2d26c4e75ad, type: 2}
+  - {fileID: 11400000, guid: db0e8c4b32700fa4591c6d4b94ddb43d, type: 2}
+  - {fileID: 11400000, guid: d658a3468d0602d4eb73a6f734b818f8, type: 2}
+  - {fileID: 11400000, guid: 7df58e658d953cc418886a39e2ad8c9e, type: 2}
+  choicesPerLevelUp: 3
+--- !u!4 &1793102861
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1793102859}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1866052350
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1866052352}
+  - component: {fileID: 1866052351}
+  m_Layer: 0
+  m_Name: ExpDropManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1866052351
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1866052350}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 67f6136f2a61dc74485a9b0d0782fd93, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SurvivorGame.Systems.ExpDropManager
+  expGemPrefab: {fileID: 2613203503622456875, guid: 432ab5b900bde054399dfa8b212ff629, type: 3}
+  playerExperience: {fileID: 1745635152}
+  prewarmCount: 80
+  scatterRadius: 0.2
+--- !u!4 &1866052352
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1866052350}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -770,3 +912,5 @@ SceneRoots:
   - {fileID: 1745635148}
   - {fileID: 1739994255}
   - {fileID: 300378237}
+  - {fileID: 1866052352}
+  - {fileID: 1793102861}
