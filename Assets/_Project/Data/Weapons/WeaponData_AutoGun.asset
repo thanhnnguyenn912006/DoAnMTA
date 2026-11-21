@@ -1,0 +1,50 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed96fc29f4cb27e42ac30c4817ccb008, type: 3}
+  m_Name: WeaponData_AutoGun
+  m_EditorClassIdentifier: Assembly-CSharp::SurvivorGame.Data.WeaponData
+  weaponId: auto_gun
+  weaponName: "\u0110\u1EA1n T\u1EF1 Nh\u1EAFm"
+  weaponType: 0
+  icon: {fileID: 0}
+  projectilePrefab: {fileID: 5937978022321881718, guid: a3add8c316741da40b53fb7469e2eaf2, type: 3}
+  levels:
+  - damage: 15
+    cooldown: 0.85
+    range: 7
+    projectileSpeed: 12
+    projectileCount: 1
+    upgradeDescription: "B\u1EAFn \u0111\u1EA1n t\u1EF1 \u0111\u1ED9ng nh\u1EAFm qu\xE1i g\u1EA7n nh\u1EA5t"
+  - damage: 22
+    cooldown: 0.75
+    range: 7.5
+    projectileSpeed: 13
+    projectileCount: 1
+    upgradeDescription: "T\u0103ng s\xE1t th\u01B0\u01A1ng v\xE0 t\u1ED1c \u0111\u1ED9 b\u1EAFn"
+  - damage: 25
+    cooldown: 0.7
+    range: 8
+    projectileSpeed: 14
+    projectileCount: 2
+    upgradeDescription: "B\u1EAFn 2 vi\xEAn \u0111\u1EA1n c\xF9ng l\xFAc"
+  - damage: 35
+    cooldown: 0.6
+    range: 8.5
+    projectileSpeed: 15
+    projectileCount: 2
+    upgradeDescription: "T\u0103ng m\u1EA1nh s\xE1t th\u01B0\u01A1ng v\xE0 t\u1EA7m b\u1EAFn"
+  - damage: 45
+    cooldown: 0.5
+    range: 9
+    projectileSpeed: 16
+    projectileCount: 3
+    upgradeDescription: "B\u1EAFn 3 vi\xEAn \u0111\u1EA1n t\u1ED1c \u0111\u1ED9 c\u1EF1c nhanh"
