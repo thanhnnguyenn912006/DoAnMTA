@@ -6,6 +6,7 @@ namespace SurvivorGame.Weapons
 {
     /// <summary>
     /// Vũ khí 1: Tự động tìm quái gần nhất trong tầm và bắn đạn về phía đó.
+    /// Hỗ trợ Object Pooling để loại bỏ Instantiate/Destroy liên tục.
     /// </summary>
     public class AutoTargetWeapon : WeaponBase
     {
@@ -14,15 +15,38 @@ namespace SurvivorGame.Weapons
         [SerializeField] private float multiShotSpreadAngle = 12f;
         [SerializeField] private float projectileLifetime = 2.5f;
 
+        [Header("Tối ưu hiệu năng (Object Pooling)")]
+        [SerializeField] private bool useObjectPooling = true;
+        [SerializeField, Min(0)] private int prewarmCount = 40;
+
         // Bộ đệm cấp phát 1 lần duy nhất để tránh sinh rác bộ nhớ (GC) khi quét quái
         private readonly Collider2D[] _hitBuffer = new Collider2D[64];
         private ContactFilter2D _enemyFilter;
+        private ComponentPool<Projectile> _projectilePool;
 
         private void Awake()
         {
             _enemyFilter = new ContactFilter2D();
             _enemyFilter.SetLayerMask(enemyLayer);
             _enemyFilter.useTriggers = true;
+        }
+
+        protected override void OnStatsUpdated()
+        {
+            base.OnStatsUpdated();
+            EnsurePoolReady();
+        }
+
+        private void EnsurePoolReady()
+        {
+            if (!useObjectPooling || _projectilePool != null) return;
+            if (weaponData == null || weaponData.ProjectilePrefab == null) return;
+            if (PoolManager.Instance == null) return;
+
+            if (weaponData.ProjectilePrefab.TryGetComponent<Projectile>(out Projectile prefabComp))
+            {
+                _projectilePool = PoolManager.Instance.GetOrCreatePool(prefabComp, prewarmCount);
+            }
         }
 
         protected override bool Attack()
@@ -85,14 +109,25 @@ namespace SurvivorGame.Weapons
         }
 
         /// <summary>
-        /// Tạo viên đạn và phóng đi (sẽ chuyển sang lấy từ Object Pool ở GĐ6).
+        /// Lấy viên đạn từ Object Pool (nếu bật) hoặc Instantiate trực tiếp (để so sánh Profiler).
         /// </summary>
         protected virtual void SpawnProjectile(Vector2 direction, float speed, int damage)
         {
+            if (useObjectPooling)
+            {
+                EnsurePoolReady();
+                if (_projectilePool != null)
+                {
+                    Projectile pooled = _projectilePool.Get(transform.position, Quaternion.identity);
+                    pooled.Initialize(direction, speed, damage, projectileLifetime, _projectilePool.ReleaseCallback);
+                    return;
+                }
+            }
+
             GameObject obj = Instantiate(weaponData.ProjectilePrefab, transform.position, Quaternion.identity);
             if (obj.TryGetComponent<Projectile>(out Projectile projectile))
             {
-                projectile.Initialize(direction, speed, damage, projectileLifetime);
+                projectile.Initialize(direction, speed, damage, projectileLifetime, null);
             }
         }
 

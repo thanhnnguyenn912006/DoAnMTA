@@ -1,10 +1,12 @@
 ﻿using UnityEngine;
 using SurvivorGame.Data;
+using SurvivorGame.Systems;
 
 namespace SurvivorGame.Enemies
 {
     /// <summary>
     /// Quản lý việc sinh quái tự động ngoài rìa màn hình Camera theo đường cong độ khó và giới hạn số lượng tối đa.
+    /// Hỗ trợ Object Pooling để tái sử dụng quái không sinh rác bộ nhớ.
     /// </summary>
     public class EnemySpawner : MonoBehaviour
     {
@@ -14,12 +16,17 @@ namespace SurvivorGame.Enemies
         [SerializeField] private Transform playerTransform;
         [SerializeField] private Camera mainCamera;
 
+        [Header("Tối ưu hiệu năng (Object Pooling)")]
+        [SerializeField] private bool useObjectPooling = true;
+        [SerializeField, Min(0)] private int prewarmCount = 80;
+
         [Header("Trạng thái (chỉ đọc để theo dõi trong Inspector)")]
         [SerializeField] private float elapsedTime;
         [SerializeField] private int activeEnemyCount;
         [SerializeField] private bool isSpawning = true;
 
         private float _spawnTimer;
+        private ComponentPool<EnemyController> _enemyPool;
 
         public float ElapsedTime => elapsedTime;
         public int ActiveEnemyCount => activeEnemyCount;
@@ -39,6 +46,14 @@ namespace SurvivorGame.Enemies
                 {
                     playerTransform = playerObj.transform;
                 }
+            }
+        }
+
+        private void Start()
+        {
+            if (useObjectPooling && PoolManager.Instance != null && enemyPrefab != null)
+            {
+                _enemyPool = PoolManager.Instance.GetOrCreatePool(enemyPrefab, prewarmCount);
             }
         }
 
@@ -98,7 +113,7 @@ namespace SurvivorGame.Enemies
         }
 
         /// <summary>
-        /// Tạo thực thể quái và khởi tạo chỉ số (sẽ chuyển sang lấy từ Object Pool ở GĐ6).
+        /// Lấy quái từ Object Pool (nếu bật) hoặc Instantiate trực tiếp (để so sánh Profiler).
         /// </summary>
         protected virtual void SpawnSingleEnemy(
             EnemyData data,
@@ -107,8 +122,19 @@ namespace SurvivorGame.Enemies
             float speedMult,
             float dmgMult)
         {
-            EnemyController enemy = Instantiate(enemyPrefab, spawnPos, Quaternion.identity);
-            enemy.Initialize(data, playerTransform, hpMult, speedMult, dmgMult);
+            EnemyController enemy;
+
+            if (useObjectPooling && _enemyPool != null)
+            {
+                enemy = _enemyPool.Get(spawnPos, Quaternion.identity);
+                enemy.Initialize(data, playerTransform, hpMult, speedMult, dmgMult, _enemyPool.ReleaseCallback);
+            }
+            else
+            {
+                enemy = Instantiate(enemyPrefab, spawnPos, Quaternion.identity);
+                enemy.Initialize(data, playerTransform, hpMult, speedMult, dmgMult, null);
+            }
+
             activeEnemyCount++;
         }
 
@@ -160,12 +186,18 @@ namespace SurvivorGame.Enemies
             isSpawning = active;
         }
 
-        // Công cụ test nhanh trong Inspector để kiểm tra các mốc độ khó mà không phải ngồi đợi 2 phút
         [ContextMenu("Test: Tua nhanh +45 giây")]
         private void TestSkipTime()
         {
             elapsedTime += 45f;
             Debug.Log($"[EnemySpawner] Đã tua thời gian lên: {elapsedTime:F0}s | HP x{spawnConfig.GetHpMultiplier(elapsedTime):F2}");
+        }
+
+        [ContextMenu("Test: Stress Test (Nhảy thẳng lên 90s - Giai đoạn cao trào)")]
+        private void TestJumpToHighIntensity()
+        {
+            elapsedTime = 90f;
+            Debug.Log($"[EnemySpawner] Stress Test kích hoạt ở 90s | HP x{spawnConfig.GetHpMultiplier(elapsedTime):F2}");
         }
 
         // Vẽ khung sinh quái ngoài rìa Camera trong cửa sổ Scene để dễ quan sát và chụp báo cáo
