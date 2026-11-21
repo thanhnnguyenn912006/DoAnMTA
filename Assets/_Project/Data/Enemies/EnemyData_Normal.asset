@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 893874dbc745839438e996667f65bfe7, type: 3}
+  m_Name: EnemyData_Normal
+  m_EditorClassIdentifier: Assembly-CSharp::SurvivorGame.Data.EnemyData
+  enemyId: enemy_normal
+  enemyName: "Qu\xE1i Th\u01B0\u1EDDng"
+  maxHealth: 30
+  moveSpeed: 2.3
+  contactDamage: 10
+  expValue: 10
+  scoreValue: 10
+  customSprite: {fileID: 0}
+  tintColor: {r: 0.9372549, g: 0.26666668, b: 0.26666668, a: 1}
+  scale: 0.8
