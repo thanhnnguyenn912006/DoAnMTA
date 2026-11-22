@@ -1,0 +1,50 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ed96fc29f4cb27e42ac30c4817ccb008, type: 3}
+  m_Name: WeaponData_Orbit
+  m_EditorClassIdentifier: Assembly-CSharp::SurvivorGame.Data.WeaponData
+  weaponId: orbit_orb
+  weaponName: Cau Nang Luong
+  weaponType: 1
+  icon: {fileID: 0}
+  projectilePrefab: {fileID: 4904191101849758756, guid: 3613a74df81e7e5459501bd0c0241f01, type: 3}
+  levels:
+  - damage: 14
+    cooldown: 0.4
+    range: 2.1
+    projectileSpeed: 160
+    projectileCount: 2
+    upgradeDescription: Tao 2 cau nang luong xoay quanh bao ve
+  - damage: 20
+    cooldown: 0.35
+    range: 2.2
+    projectileSpeed: 190
+    projectileCount: 2
+    upgradeDescription: Tang sat thuong va toc do xoay
+  - damage: 22
+    cooldown: 0.35
+    range: 2.4
+    projectileSpeed: 210
+    projectileCount: 3
+    upgradeDescription: Tang len 3 cau xoay va mo rong ban kinh
+  - damage: 30
+    cooldown: 0.3
+    range: 2.5
+    projectileSpeed: 240
+    projectileCount: 4
+    upgradeDescription: Tang len 4 cau xoay toc do cao
+  - damage: 38
+    cooldown: 0.25
+    range: 2.7
+    projectileSpeed: 280
+    projectileCount: 5
+    upgradeDescription: 5 cau nang luong xoay cuc nhanh

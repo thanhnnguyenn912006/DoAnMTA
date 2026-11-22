@@ -8,11 +8,12 @@ using SurvivorGame.Weapons;
 namespace SurvivorGame.Systems
 {
     /// <summary>
-    /// Đại diện cho một lựa chọn hiển thị trên thẻ nâng cấp (có thể là Vũ khí hoặc Bị động).
+    /// Đại diện cho một lựa chọn hiển thị trên thẻ nâng cấp (Mở khóa vũ khí, Nâng cấp vũ khí hoặc Bị động).
     /// </summary>
     public struct UpgradeOption
     {
         public bool IsWeaponUpgrade;
+        public bool IsNewWeaponUnlock;
         public WeaponBase TargetWeapon;
         public PassiveUpgradeData PassiveData;
 
@@ -24,6 +25,7 @@ namespace SurvivorGame.Systems
 
     /// <summary>
     /// Lắng nghe sự kiện lên cấp, tạo 3 lựa chọn nâng cấp ngẫu nhiên không trùng lặp và quản lý tạm dừng game.
+    /// Hỗ trợ mở khóa các vũ khí đang ở trạng thái tắt (Inactive) bên trong WeaponsContainer.
     /// </summary>
     public class UpgradeManager : MonoBehaviour
     {
@@ -80,7 +82,6 @@ namespace SurvivorGame.Systems
 
         private void OnDestroy()
         {
-            // Đảm bảo không bao giờ để kẹt Time.timeScale = 0 khi đổi Scene hoặc tắt Play
             if (_isChoosingUpgrade)
             {
                 Time.timeScale = 1f;
@@ -103,7 +104,6 @@ namespace SurvivorGame.Systems
 
             if (_candidatePool.Count == 0)
             {
-                // Đã nâng tối đa toàn bộ vũ khí và bị động -> không chặn game
                 _pendingLevelUps = 0;
                 CloseUpgradeMenu();
                 return;
@@ -111,7 +111,6 @@ namespace SurvivorGame.Systems
 
             PickRandomChoices();
 
-            // Nếu chưa gắn UI (đang test Phần 2/3), chỉ in ra Console để không làm đứng game
             if (OnUpgradeChoicesReady == null)
             {
                 Debug.Log($"[UpgradeManager] Sinh {_currentChoices.Count} lựa chọn: " +
@@ -139,8 +138,21 @@ namespace SurvivorGame.Systems
 
             if (chosen.IsWeaponUpgrade && chosen.TargetWeapon != null)
             {
-                chosen.TargetWeapon.LevelUp();
-                Debug.Log($"[UpgradeManager] Đã nâng cấp vũ khí '{chosen.Title}' -> Cấp {chosen.TargetWeapon.CurrentLevel}");
+                if (chosen.IsNewWeaponUnlock || !chosen.TargetWeapon.gameObject.activeSelf)
+                {
+                    // Mở khóa vũ khí mới ở Cấp 1 và đồng bộ ngay các chỉ số bị động đang có
+                    chosen.TargetWeapon.gameObject.SetActive(true);
+                    if (playerStats != null)
+                    {
+                        playerStats.ApplyMultipliersToWeapon(chosen.TargetWeapon);
+                    }
+                    Debug.Log($"[UpgradeManager] Đã mở khóa vũ khí mới '{chosen.Title}' (Cấp 1)");
+                }
+                else
+                {
+                    chosen.TargetWeapon.LevelUp();
+                    Debug.Log($"[UpgradeManager] Đã nâng cấp vũ khí '{chosen.Title}' -> Cấp {chosen.TargetWeapon.CurrentLevel}");
+                }
             }
             else if (!chosen.IsWeaponUpgrade && chosen.PassiveData != null && playerStats != null)
             {
@@ -170,14 +182,34 @@ namespace SurvivorGame.Systems
         {
             _candidatePool.Clear();
 
-            // 1. Gom các vũ khí đang sở hữu chưa đạt cấp tối đa
+            // 1. Gom toàn bộ vũ khí (bao gồm cả vũ khí đang tắt để cho phép mở khóa khi lên cấp)
             if (weaponsContainer != null)
             {
-                WeaponBase[] weapons = weaponsContainer.GetComponentsInChildren<WeaponBase>();
+                WeaponBase[] weapons = weaponsContainer.GetComponentsInChildren<WeaponBase>(true);
                 for (int i = 0; i < weapons.Length; i++)
                 {
                     WeaponBase weapon = weapons[i];
-                    if (weapon == null || weapon.Data == null || weapon.IsMaxLevel) continue;
+                    if (weapon == null || weapon.Data == null) continue;
+
+                    bool isUnlocked = weapon.gameObject.activeSelf;
+
+                    if (!isUnlocked)
+                    {
+                        WeaponLevelStats lv1Stats = weapon.Data.GetStats(1);
+                        _candidatePool.Add(new UpgradeOption
+                        {
+                            IsWeaponUpgrade = true,
+                            IsNewWeaponUnlock = true,
+                            TargetWeapon = weapon,
+                            Title = weapon.Data.WeaponName,
+                            LevelText = "Vu Khi Moi (Cap 1)",
+                            Description = lv1Stats.upgradeDescription,
+                            Icon = weapon.Data.Icon
+                        });
+                        continue;
+                    }
+
+                    if (weapon.IsMaxLevel) continue;
 
                     int nextLevel = weapon.CurrentLevel + 1;
                     WeaponLevelStats nextStats = weapon.Data.GetStats(nextLevel);
@@ -185,6 +217,7 @@ namespace SurvivorGame.Systems
                     _candidatePool.Add(new UpgradeOption
                     {
                         IsWeaponUpgrade = true,
+                        IsNewWeaponUnlock = false,
                         TargetWeapon = weapon,
                         Title = weapon.Data.WeaponName,
                         LevelText = $"Cap {weapon.CurrentLevel} -> {nextLevel}",
@@ -208,6 +241,7 @@ namespace SurvivorGame.Systems
                     _candidatePool.Add(new UpgradeOption
                     {
                         IsWeaponUpgrade = false,
+                        IsNewWeaponUnlock = false,
                         PassiveData = passive,
                         Title = passive.UpgradeName,
                         LevelText = currentLv == 0 ? "Moi (Cap 1)" : $"Cap {currentLv} -> {nextLv}",
