@@ -6,7 +6,7 @@ namespace SurvivorGame.Enemies
 {
     /// <summary>
     /// Quản lý việc sinh quái tự động ngoài rìa màn hình Camera theo đường cong độ khó và giới hạn số lượng tối đa.
-    /// Hỗ trợ Object Pooling để tái sử dụng quái không sinh rác bộ nhớ.
+    /// Hỗ trợ Object Pooling cho nhiều loại Prefab quái khác nhau thông qua EnemyData.CustomPrefab.
     /// </summary>
     public class EnemySpawner : MonoBehaviour
     {
@@ -26,11 +26,12 @@ namespace SurvivorGame.Enemies
         [SerializeField] private bool isSpawning = true;
 
         private float _spawnTimer;
-        private ComponentPool<EnemyController> _enemyPool;
+        private ComponentPool<EnemyController> _defaultEnemyPool;
 
         public float ElapsedTime => elapsedTime;
         public int ActiveEnemyCount => activeEnemyCount;
         public int MaxActiveEnemies => spawnConfig != null ? spawnConfig.MaxActiveEnemies : 150;
+        public Transform PlayerTransform => playerTransform;
 
         private void Awake()
         {
@@ -53,7 +54,7 @@ namespace SurvivorGame.Enemies
         {
             if (useObjectPooling && PoolManager.Instance != null && enemyPrefab != null)
             {
-                _enemyPool = PoolManager.Instance.GetOrCreatePool(enemyPrefab, prewarmCount);
+                _defaultEnemyPool = PoolManager.Instance.GetOrCreatePool(enemyPrefab, prewarmCount);
             }
         }
 
@@ -88,9 +89,6 @@ namespace SurvivorGame.Enemies
             SpawnBatch(currentPhase);
         }
 
-        /// <summary>
-        /// Sinh một nhóm nhỏ quái theo thông số giai đoạn, tuân thủ trần tối đa.
-        /// </summary>
         private void SpawnBatch(SpawnPhase phase)
         {
             float hpMult = spawnConfig.GetHpMultiplier(elapsedTime);
@@ -112,9 +110,6 @@ namespace SurvivorGame.Enemies
             }
         }
 
-        /// <summary>
-        /// Lấy quái từ Object Pool (nếu bật) hoặc Instantiate trực tiếp (để so sánh Profiler).
-        /// </summary>
         protected virtual void SpawnSingleEnemy(
             EnemyData data,
             Vector3 spawnPos,
@@ -122,52 +117,68 @@ namespace SurvivorGame.Enemies
             float speedMult,
             float dmgMult)
         {
+            EnemyController targetPrefab = ResolvePrefab(data);
             EnemyController enemy;
 
-            if (useObjectPooling && _enemyPool != null)
+            if (useObjectPooling && PoolManager.Instance != null)
             {
-                enemy = _enemyPool.Get(spawnPos, Quaternion.identity);
-                enemy.Initialize(data, playerTransform, hpMult, speedMult, dmgMult, _enemyPool.ReleaseCallback);
+                ComponentPool<EnemyController> pool = (targetPrefab == enemyPrefab && _defaultEnemyPool != null)
+                    ? _defaultEnemyPool
+                    : PoolManager.Instance.GetOrCreatePool(targetPrefab, 20);
+
+                enemy = pool.Get(spawnPos, Quaternion.identity);
+                enemy.Initialize(data, playerTransform, hpMult, speedMult, dmgMult, pool.ReleaseCallback);
             }
             else
             {
-                enemy = Instantiate(enemyPrefab, spawnPos, Quaternion.identity);
+                enemy = Instantiate(targetPrefab, spawnPos, Quaternion.identity);
                 enemy.Initialize(data, playerTransform, hpMult, speedMult, dmgMult, null);
             }
 
             activeEnemyCount++;
         }
 
+        private EnemyController ResolvePrefab(EnemyData data)
+        {
+            if (data != null && data.CustomPrefab != null &&
+                data.CustomPrefab.TryGetComponent<EnemyController>(out EnemyController customCtrl))
+            {
+                return customCtrl;
+            }
+
+            return enemyPrefab;
+        }
+
         /// <summary>
         /// Tính tọa độ ngẫu nhiên nằm ngay bên ngoài 1 trong 4 cạnh của Camera 2D.
         /// </summary>
-        private Vector3 GetSpawnPositionOutsideCamera()
+        public Vector3 GetSpawnPositionOutsideCamera()
         {
             float halfHeight = mainCamera.orthographicSize;
             float halfWidth = halfHeight * mainCamera.aspect;
-            float margin = spawnConfig.SpawnMargin;
+            float margin = spawnConfig != null ? spawnConfig.SpawnMargin : 1.5f;
 
             Vector3 camPos = mainCamera.transform.position;
-            int edge = Random.Range(0, 4); // 0: Trên, 1: Dưới, 2: Trái, 3: Phải
+            int edge = Random.Range(0, 4);
 
             float x = camPos.x;
             float y = camPos.y;
 
             switch (edge)
             {
-                case 0: // Cạnh trên
+                case 0:
                     x = camPos.x + Random.Range(-halfWidth - margin, halfWidth + margin);
                     y = camPos.y + halfHeight + margin;
                     break;
-                case 1: // Cạnh dưới
+                case 1:
                     x = camPos.x + Random.Range(-halfWidth - margin, halfWidth + margin);
                     y = camPos.y - halfHeight - margin;
                     break;
-                case 2: // Cạnh trái
+                case 2:
                     x = camPos.x - halfWidth - margin;
                     y = camPos.y + Random.Range(-halfHeight - margin, halfHeight + margin);
                     break;
-                default: // Cạnh phải
+                default:
                     x = camPos.x + halfWidth + margin;
                     y = camPos.y + Random.Range(-halfHeight - margin, halfHeight + margin);
                     break;
@@ -200,7 +211,6 @@ namespace SurvivorGame.Enemies
             Debug.Log($"[EnemySpawner] Stress Test kích hoạt ở 90s | HP x{spawnConfig.GetHpMultiplier(elapsedTime):F2}");
         }
 
-        // Vẽ khung sinh quái ngoài rìa Camera trong cửa sổ Scene để dễ quan sát và chụp báo cáo
         private void OnDrawGizmosSelected()
         {
             Camera cam = mainCamera != null ? mainCamera : Camera.main;

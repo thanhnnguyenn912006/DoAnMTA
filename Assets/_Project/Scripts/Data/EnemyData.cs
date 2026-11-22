@@ -26,6 +26,9 @@ namespace SurvivorGame.Data
         [SerializeField] private Color tintColor = Color.red;
         [SerializeField, Min(0.2f)] private float scale = 1f;
 
+        [Header("Prefab tùy chỉnh (để trống = dùng Enemy_Base)")]
+        [SerializeField] private GameObject customPrefab;
+
         public string EnemyId => enemyId;
         public string EnemyName => enemyName;
         public int MaxHealth => maxHealth;
@@ -36,5 +39,6 @@ namespace SurvivorGame.Data
         public Sprite CustomSprite => customSprite;
         public Color TintColor => tintColor;
         public float Scale => scale;
+        public GameObject CustomPrefab => customPrefab;
     }
 }

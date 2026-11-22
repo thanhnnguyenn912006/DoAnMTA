@@ -35,6 +35,8 @@ MonoBehaviour:
       weight: 6
     - enemyData: {fileID: 11400000, guid: f871ff34b6d060b42afee3a35ba21312, type: 2}
       weight: 4
+    - enemyData: {fileID: 11400000, guid: b50f9aa3e660db04e9dec8223e1961fa, type: 2}
+      weight: 2
   - phaseName: "Giai \u0111o\u1EA1n 3 - Cao tr\xE0o"
     startTime: 75
     spawnInterval: 0.65
@@ -45,4 +47,6 @@ MonoBehaviour:
     - enemyData: {fileID: 11400000, guid: f871ff34b6d060b42afee3a35ba21312, type: 2}
       weight: 3
     - enemyData: {fileID: 11400000, guid: 9cdc3abdc290d714081edb5b91a6d408, type: 2}
+      weight: 2
+    - enemyData: {fileID: 11400000, guid: b50f9aa3e660db04e9dec8223e1961fa, type: 2}
       weight: 2
