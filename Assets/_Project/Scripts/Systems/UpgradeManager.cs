@@ -210,7 +210,7 @@ namespace SurvivorGame.Systems
                         IsNewWeaponUnlock = false,
                         TargetWeapon = weapon,
                         Title = weapon.Data.WeaponName,
-                        LevelText = $"Cap {weapon.CurrentLevel} -> {nextLevel}",
+                        LevelText = $"Cấp {weapon.CurrentLevel} -> {nextLevel}",
                         Description = nextStats.upgradeDescription,
                         Icon = weapon.Data.Icon
                     });

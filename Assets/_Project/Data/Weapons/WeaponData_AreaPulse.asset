@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: WeaponData_AreaPulse
   m_EditorClassIdentifier: Assembly-CSharp::SurvivorGame.Data.WeaponData
   weaponId: area_pulse
-  weaponName: Song Xung Kich
+  weaponName: "S\xF3ng xung k\xEDch"
   weaponType: 2
   icon: {fileID: -1560586196681343199, guid: 85c8b3acdc87382448439a47f5684b82, type: 3}
   projectilePrefab: {fileID: 0}
@@ -23,28 +23,28 @@ MonoBehaviour:
     range: 2.8
     projectileSpeed: 0
     projectileCount: 1
-    upgradeDescription: Phat song sat thuong dien rong quanh nhan vat
+    upgradeDescription: "Ph\xE1t s\xF3ng s\xE1t th\u01B0\u01A1ng di\u1EC7n r\u1ED9ng quanh nh\xE2n v\u1EADt"
   - damage: 20
     cooldown: 2.1
     range: 3.2
     projectileSpeed: 0
     projectileCount: 1
-    upgradeDescription: Tang sat thuong, pham vi va giam hoi chieu
+    upgradeDescription: "T\u0103ng s\xE1t th\u01B0\u01A1ng, ph\u1EA1m vi v\xE0 gi\u1EA3m h\u1ED3i chi\xEAu"
   - damage: 28
     cooldown: 1.85
     range: 3.6
     projectileSpeed: 0
     projectileCount: 1
-    upgradeDescription: Song xung kich rong hon va manh hon
+    upgradeDescription: "S\xF3ng sung k\xEDch r\u1ED9ng h\u01A1n v\xE0 m\u1EA1nh h\u01A1n"
   - damage: 38
     cooldown: 1.6
     range: 4.1
     projectileSpeed: 0
     projectileCount: 1
-    upgradeDescription: Phat song lien tuc voi sat thuong cao
+    upgradeDescription: "Ph\xE1t s\xF3ng li\xEAn t\u1EE5c v\u1EDBi s\xE1t th\u01B0\u01A1ng cao"
   - damage: 52
     cooldown: 1.35
     range: 4.7
     projectileSpeed: 0
     projectileCount: 1
-    upgradeDescription: Song xung kich cuc dai quet sach quai xung quanh
+    upgradeDescription: "S\xF3ng xung k\xEDch c\u1EF1c \u0111\u1EA1i qu\xE9t s\u1EA1ch m\u1ECDi th\u1EE9 xung quanh"

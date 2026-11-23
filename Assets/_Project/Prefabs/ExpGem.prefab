@@ -28,7 +28,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -0.21928, y: 0.76521, z: 0}
-  m_LocalScale: {x: 0.3, y: 0.3, z: 1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -82,7 +82,7 @@ SpriteRenderer:
   m_SortingLayer: 3
   m_SortingOrder: 2
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 3625043607559282579, guid: 19fb86013d8c24d6cb8410c0aadf30fa, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 52da02e380950fe43bde5ea3c0435fe3, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -108,6 +108,6 @@ MonoBehaviour:
   initialPullSpeed: 4
   pullAcceleration: 22
   maxPullSpeed: 16
-  smallGemColor: {r: 0.22, g: 0.74, b: 0.97, a: 1}
-  mediumGemColor: {r: 0.2, g: 0.83, b: 0.6, a: 1}
-  largeGemColor: {r: 0.98, g: 0.8, b: 0.08, a: 1}
+  smallGemColor: {r: 0.16078432, g: 0.7137255, b: 0.9647059, a: 1}
+  mediumGemColor: {r: 1, g: 0.8352941, b: 0.30980393, a: 1}
+  largeGemColor: {r: 1, g: 0.23921569, b: 0.23921569, a: 1}

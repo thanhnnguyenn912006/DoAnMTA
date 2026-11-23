@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Passive_Damage
   m_EditorClassIdentifier: Assembly-CSharp::SurvivorGame.Data.PassiveUpgradeData
   upgradeId: passive_dmg
-  upgradeName: Suc Manh
+  upgradeName: "S\u1EE9c m\u1EA1nh"
   icon: {fileID: 6720371789256062168, guid: b2ed658bce4223141b687b9b855a6dce, type: 3}
-  description: Tang +15% sat thuong cho tat ca vu khi
+  description: "T\u0103ng 15% s\xE1t th\u01B0\u01A1ng cho t\u1EA5t c\u1EA3 v\u0169 kh\xED"
   upgradeType: 0
   maxLevel: 5
   valuePerLevel: 0.15

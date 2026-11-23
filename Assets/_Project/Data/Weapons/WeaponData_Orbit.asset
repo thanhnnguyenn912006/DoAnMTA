@@ -23,28 +23,28 @@ MonoBehaviour:
     range: 2.1
     projectileSpeed: 160
     projectileCount: 2
-    upgradeDescription: Tao 2 cau nang luong xoay quanh bao ve
+    upgradeDescription: "T\u1EA1o 2 c\u1EA7u n\u0103ng l\u01B0\u1EE3ng bay quanh nh\xE2n v\u1EADt"
   - damage: 20
     cooldown: 0.35
     range: 2.2
     projectileSpeed: 190
     projectileCount: 2
-    upgradeDescription: Tang sat thuong va toc do xoay
+    upgradeDescription: "T\u0103ng s\xE1t th\u01B0\u01A1ng v\xE0 t\u1ED1c \u0111\u1ED9 c\u1EE7a c\u1EA7u"
   - damage: 22
     cooldown: 0.35
     range: 2.4
     projectileSpeed: 210
     projectileCount: 3
-    upgradeDescription: Tang len 3 cau xoay va mo rong ban kinh
+    upgradeDescription: "T\u0103ng th\xE0nh 3 qu\u1EA3 c\u1EA7u v\xE0 m\u1EDF r\u1ED9ng b\xE1n k\xEDnh"
   - damage: 30
     cooldown: 0.3
     range: 2.5
     projectileSpeed: 240
     projectileCount: 4
-    upgradeDescription: Tang len 4 cau xoay toc do cao
+    upgradeDescription: "T\u0103ng th\xE0nh 4 qu\u1EA3 c\u1EA7u xoay v\u1EDBi t\u1ED1c \u0111\u1ED9 cao"
   - damage: 38
     cooldown: 0.25
     range: 2.7
     projectileSpeed: 280
     projectileCount: 5
-    upgradeDescription: 5 cau nang luong xoay cuc nhanh
+    upgradeDescription: "5 c\u1EA7u n\u0103ng l\u01B0\u1EE3ng xoay c\u1EF1c nhanh qu\xE9t s\u1EA1ch k\u1EBB th\xF9"

@@ -13,9 +13,9 @@ MonoBehaviour:
   m_Name: Passive_Cooldown
   m_EditorClassIdentifier: Assembly-CSharp::SurvivorGame.Data.PassiveUpgradeData
   upgradeId: passive_cd
-  upgradeName: Toc Do Ban
+  upgradeName: "T\u1ED1c \u0111\u1ED9 \u0111\xE1nh"
   icon: {fileID: 1670883301750769686, guid: 41405dc9ca7c4f549a1a250999f0d1c8, type: 3}
-  description: Giam 10% thoi gian hoi chieu vu khi
+  description: "Gi\u1EA3m 10% h\u1ED3i chi\xEAu c\u1EE7a v\u0169 kh\xED"
   upgradeType: 1
   maxLevel: 5
   valuePerLevel: 0.1

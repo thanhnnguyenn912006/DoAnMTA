@@ -20,5 +20,10 @@ MonoBehaviour:
   expValue: 10
   scoreValue: 10
   customSprite: {fileID: 0}
-  tintColor: {r: 0.9372549, g: 0.26666668, b: 0.26666668, a: 1}
+  walkFrames:
+  - {fileID: 21300000, guid: fbf05df1a930e124e8939fa25dfaba2b, type: 3}
+  - {fileID: 21300000, guid: 523ecbc4dd4e35c4d9d7f5cb06e625e8, type: 3}
+  frameInterval: 0.25
+  tintColor: {r: 1, g: 1, b: 1, a: 1}
   scale: 0.8
+  customPrefab: {fileID: 0}

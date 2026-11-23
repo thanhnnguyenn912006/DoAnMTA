@@ -18,6 +18,8 @@ GameObject:
   - component: {fileID: 5291402410900620330}
   - component: {fileID: 5915802894080137474}
   - component: {fileID: 2279991804646779275}
+  - component: {fileID: -7503608230229646814}
+  - component: {fileID: 516020403195332194}
   m_Layer: 7
   m_Name: Enemy_Boss
   m_TagString: Boss
@@ -199,7 +201,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4c695aa86e27a654890926d59dd437c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SurvivorGame.Systems.DamageFlash
-  flashColor: {r: 1, g: 1, b: 1, a: 1}
+  flashColor: {r: 1, g: 0.41960785, b: 0.41960785, a: 1}
   flashDuration: 0.08
   blinkInterval: 0.08
   blinkAlpha: 0.35
@@ -258,7 +260,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe523a24d7f27954c9d3d6ec9e0659f6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SurvivorGame.Enemies.BossAttackController
-  projectilePrefab: {fileID: 9193575257904762753, guid: 62e30bcb3f94f9147ad360034451a091, type: 3}
+  projectilePrefab: {fileID: 9193575257904762753, guid: 530c8b84856d0c74e9c01127aab8988e, type: 3}
   projectilePrewarmCount: 40
   burstProjectileCount: 10
   burstCooldown: 3.6
@@ -274,3 +276,32 @@ MonoBehaviour:
   enrageHealthThreshold: 0.5
   enrageExtraProjectiles: 4
   enrageCooldownMultiplier: 0.75
+--- !u!114 &-7503608230229646814
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4682937372566586718}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 239f02a96cab5394cb49bf724b7c0e20, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SurvivorGame.Systems.SpriteFrameAnimator
+  frames: []
+  frameInterval: 0.25
+  randomizeStart: 1
+--- !u!114 &516020403195332194
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4682937372566586718}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b24a09c072c0ddd4aa014a2d79eaf8c8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SurvivorGame.Systems.SpriteFlipByVelocity
+  spriteFacesRight: 1
+  deadZone: 0.05

@@ -17,6 +17,8 @@ GameObject:
   - component: {fileID: 8854125525504400988}
   - component: {fileID: 5291402410900620330}
   - component: {fileID: 5915802894080137474}
+  - component: {fileID: 7029037021620144158}
+  - component: {fileID: -8077943890558079417}
   m_Layer: 7
   m_Name: Enemy_Base
   m_TagString: Enemy
@@ -198,7 +200,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4c695aa86e27a654890926d59dd437c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SurvivorGame.Systems.DamageFlash
-  flashColor: {r: 1, g: 1, b: 1, a: 1}
+  flashColor: {r: 1, g: 0.41960785, b: 0.41960785, a: 1}
   flashDuration: 0.08
   blinkInterval: 0.08
   blinkAlpha: 0.35
@@ -245,3 +247,32 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SurvivorGame.Enemies.EnemyController
   defaultEnemyData: {fileID: 11400000, guid: 68985a7930a696842b561935138c3562, type: 2}
+--- !u!114 &7029037021620144158
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4682937372566586718}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 239f02a96cab5394cb49bf724b7c0e20, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SurvivorGame.Systems.SpriteFrameAnimator
+  frames: []
+  frameInterval: 0.25
+  randomizeStart: 1
+--- !u!114 &-8077943890558079417
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4682937372566586718}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b24a09c072c0ddd4aa014a2d79eaf8c8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SurvivorGame.Systems.SpriteFlipByVelocity
+  spriteFacesRight: 1
+  deadZone: 0.05

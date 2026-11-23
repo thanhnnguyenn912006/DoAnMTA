@@ -13,13 +13,17 @@ MonoBehaviour:
   m_Name: EnemyData_Boss
   m_EditorClassIdentifier: Assembly-CSharp::SurvivorGame.Data.EnemyData
   enemyId: boss_overlord
-  enemyName: BOSS - CHUA TE BONG TOI
+  enemyName: "BOSS - CH\xDAA T\u1EC2 B\xD3NG T\u1ED0I"
   maxHealth: 650
   moveSpeed: 2.2
   contactDamage: 22
   expValue: 120
   scoreValue: 500
   customSprite: {fileID: 0}
-  tintColor: {r: 0.7254902, g: 0.10980392, b: 0.10980392, a: 1}
+  walkFrames:
+  - {fileID: 21300000, guid: 8dc179d8efdd3a0468a39e0ed7fbc059, type: 3}
+  - {fileID: 21300000, guid: 009d5e69b425b50468cc0faed940a628, type: 3}
+  frameInterval: 0.25
+  tintColor: {r: 1, g: 1, b: 1, a: 1}
   scale: 2.2
   customPrefab: {fileID: 0}

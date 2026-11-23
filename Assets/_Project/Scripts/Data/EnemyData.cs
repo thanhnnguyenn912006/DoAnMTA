@@ -23,6 +23,9 @@ namespace SurvivorGame.Data
 
         [Header("Hiển thị")]
         [SerializeField] private Sprite customSprite; // Để trống sẽ giữ nguyên hình mặc định của Prefab
+        [Header("Hoạt ảnh đi bộ (để trống = đứng yên)")]
+        [SerializeField] private Sprite[] walkFrames;
+        [SerializeField, Min(0.05f)] private float frameInterval = 0.25f;
         [SerializeField] private Color tintColor = Color.red;
         [SerializeField, Min(0.2f)] private float scale = 1f;
 
@@ -40,5 +43,7 @@ namespace SurvivorGame.Data
         public Color TintColor => tintColor;
         public float Scale => scale;
         public GameObject CustomPrefab => customPrefab;
+        public Sprite[] WalkFrames => walkFrames;
+        public float FrameInterval => frameInterval;
     }
 }

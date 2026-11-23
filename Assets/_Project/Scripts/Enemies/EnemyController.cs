@@ -23,6 +23,7 @@ namespace SurvivorGame.Enemies
         private EnemyChaseMovement _movement;
         private ContactDamage _contactDamage;
         private DamageFlash _damageFlash;
+        private SpriteFrameAnimator _frameAnimator;
         private SpriteRenderer _spriteRenderer;
         private Collider2D _collider;
         private Sprite _defaultSprite;
@@ -43,6 +44,7 @@ namespace SurvivorGame.Enemies
             _movement = GetComponent<EnemyChaseMovement>();
             _contactDamage = GetComponent<ContactDamage>();
             TryGetComponent(out _damageFlash);
+            TryGetComponent(out _frameAnimator);
             _spriteRenderer = GetComponent<SpriteRenderer>();
             _collider = GetComponent<Collider2D>();
 
@@ -89,9 +91,14 @@ namespace SurvivorGame.Enemies
             _returnToPoolCallback = returnToPoolCallback;
             _isInitialized = true;
 
-            // 1. Áp dụng ngoại hình (kích thước, hình ảnh, màu sắc)
+            // 1. Áp dụng ngoại hình (kích thước, hình ảnh, hoạt ảnh, màu sắc)
             transform.localScale = Vector3.one * data.Scale;
             _spriteRenderer.sprite = data.CustomSprite != null ? data.CustomSprite : _defaultSprite;
+
+            if (_frameAnimator != null)
+            {
+                _frameAnimator.SetFrames(data.WalkFrames, data.FrameInterval);
+            }
 
             if (_damageFlash != null)
             {
