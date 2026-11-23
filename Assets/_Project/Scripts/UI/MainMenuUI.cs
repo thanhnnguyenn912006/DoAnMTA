@@ -45,7 +45,7 @@ namespace SurvivorGame.UI
             int highScore = PlayerPrefs.GetInt(GameManager.HighScoreKey, 0);
             float bestTime = PlayerPrefs.GetFloat(GameManager.BestTimeKey, 0f);
 
-            recordText.text = $"KY LUC: {highScore} DIEM   |   LAU NHAT: {GameManager.FormatTime(bestTime)}";
+            recordText.text = $"KỶ LỤC: {highScore} ĐIỂM   |   LÂU NHẤT: {GameManager.FormatTime(bestTime)}";
         }
 
         private void HandlePlayClicked()

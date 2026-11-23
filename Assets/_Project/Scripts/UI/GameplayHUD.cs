@@ -122,12 +122,12 @@ namespace SurvivorGame.UI
         {
             if (scoreText != null)
             {
-                scoreText.text = $"DIEM: {score}";
+                scoreText.text = $"ĐIỂM: {score}";
             }
 
             if (killCountText != null)
             {
-                killCountText.text = $"DA HA: {killCount}";
+                killCountText.text = $"ĐÃ HẠ: {killCount}";
             }
         }
     }

@@ -53,7 +53,7 @@ namespace SurvivorGame.UI
             AudioManager.Instance?.SetBgmVolume(value);
             if (bgmValueText != null)
             {
-                bgmValueText.text = $"NHAC NEN: {Mathf.RoundToInt(value * 100f)}%";
+                bgmValueText.text = $"NHẠC NỀN: {Mathf.RoundToInt(value * 100f)}%";
             }
         }
 
@@ -63,7 +63,7 @@ namespace SurvivorGame.UI
             AudioManager.Instance?.PlayButtonClick();
             if (sfxValueText != null)
             {
-                sfxValueText.text = $"HIEU UNG: {Mathf.RoundToInt(value * 100f)}%";
+                sfxValueText.text = $"HIỆU ỨNG: {Mathf.RoundToInt(value * 100f)}%";
             }
         }
 

@@ -102,20 +102,20 @@ namespace SurvivorGame.UI
         {
             if (endTitleText != null)
             {
-                endTitleText.text = isVictory ? "CHIEN THANG!" : "GAME OVER";
+                endTitleText.text = isVictory ? "CHIẾN THẮNG!" : "GAME OVER";
                 endTitleText.color = isVictory ? victoryColor : gameOverColor;
             }
 
             if (endStatsText != null && gameManager != null)
             {
                 string timeText = GameManager.FormatTime(gameManager.SurvivalTime);
-                string recordSuffix = gameManager.IsNewHighScore ? " (MOI!)" : string.Empty;
+                string recordSuffix = gameManager.IsNewHighScore ? " (MỚI!)" : string.Empty;
 
                 endStatsText.text =
-                    $"Thoi gian song sot: {timeText}\n" +
-                    $"So quai da ha: {gameManager.KillCount}\n" +
-                    $"Diem so: {gameManager.Score}\n" +
-                    $"Ky luc cao nhat: {gameManager.HighScore}{recordSuffix}";
+                    $"Thời gian sống sót: {timeText}\n" +
+                    $"Số quái đã hạ: {gameManager.KillCount}\n" +
+                    $"Điểm số: {gameManager.Score}\n" +
+                    $"Kỷ lục cao nhất: {gameManager.HighScore}{recordSuffix}";
             }
         }
 

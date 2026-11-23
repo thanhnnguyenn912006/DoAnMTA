@@ -192,7 +192,7 @@ namespace SurvivorGame.Systems
                             IsNewWeaponUnlock = true,
                             TargetWeapon = weapon,
                             Title = weapon.Data.WeaponName,
-                            LevelText = "Vu Khi Moi (Cap 1)",
+                            LevelText = "VŨ KHÍ MỚI (Cấp 1)",
                             Description = lv1Stats.upgradeDescription,
                             Icon = weapon.Data.Icon
                         });
@@ -234,7 +234,7 @@ namespace SurvivorGame.Systems
                         IsNewWeaponUnlock = false,
                         PassiveData = passive,
                         Title = passive.UpgradeName,
-                        LevelText = currentLv == 0 ? "Moi (Cap 1)" : $"Cap {currentLv} -> {nextLv}",
+                        LevelText = currentLv == 0 ? "Mới (Cấp 1)" : $"Cấp {currentLv} -> {nextLv}",
                         Description = passive.Description,
                         Icon = passive.Icon
                     });
