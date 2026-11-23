@@ -80,14 +80,6 @@ namespace SurvivorGame.Systems
             }
         }
 
-        private void OnDestroy()
-        {
-            if (_isChoosingUpgrade)
-            {
-                Time.timeScale = 1f;
-            }
-        }
-
         private void HandleLevelUp(int newLevel)
         {
             _pendingLevelUps++;
@@ -120,7 +112,6 @@ namespace SurvivorGame.Systems
             }
 
             _isChoosingUpgrade = true;
-            Time.timeScale = 0f;
             OnUpgradeChoicesReady.Invoke(_currentChoices);
         }
 
@@ -174,7 +165,6 @@ namespace SurvivorGame.Systems
         private void CloseUpgradeMenu()
         {
             _isChoosingUpgrade = false;
-            Time.timeScale = 1f;
             OnUpgradeMenuClosed?.Invoke();
         }
 

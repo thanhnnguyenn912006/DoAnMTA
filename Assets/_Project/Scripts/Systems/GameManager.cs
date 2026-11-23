@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using SurvivorGame.Enemies;
@@ -8,19 +9,23 @@ namespace SurvivorGame.Systems
     public enum GameState
     {
         Playing,
+        LevelUp,
         Paused,
         GameOver,
         Victory
     }
 
     /// <summary>
-    /// Quản lý vòng lặp trận đấu: trạng thái chơi, tạm dừng (ESC), điểm số, số quái hạ,
-    /// điều kiện Thắng/Thua và lưu kỷ lục qua PlayerPrefs.
+    /// Quản lý vòng lặp trận đấu (nguồn chân lý duy nhất điều khiển Time.timeScale):
+    /// trạng thái chơi, lên cấp (LevelUp), tạm dừng (ESC), điểm số, điều kiện Thắng/Thua và lưu kỷ lục.
     /// </summary>
+    [DisallowMultipleComponent]
     public class GameManager : MonoBehaviour
     {
         public const string HighScoreKey = "Survivor_HighScore";
         public const string BestTimeKey = "Survivor_BestTime";
+
+        public static GameManager Instance { get; private set; }
 
         [Header("Tham chiếu bắt buộc")]
         [SerializeField] private Health playerHealth;
@@ -28,7 +33,7 @@ namespace SurvivorGame.Systems
         [SerializeField] private UpgradeManager upgradeManager;
 
         [Header("Cấu hình trận đấu")]
-        [SerializeField, Min(10f)] private float victorySurvivalTime = 300f; // Sống sót đủ 5 phút (300s) để chiến thắng
+        [SerializeField, Min(0f)] private float victorySurvivalTime = 0f; // 0 = tắt thắng theo thời gian (thắng khi hạ Boss)
         [SerializeField] private string mainMenuSceneName = "MainMenu";
 
         [Header("Trạng thái (chỉ đọc để theo dõi)")]
@@ -51,6 +56,14 @@ namespace SurvivorGame.Systems
 
         private void Awake()
         {
+            if (Instance != null && Instance != this)
+            {
+                Debug.LogWarning($"[GameManager] Phat hien ban trung tren '{name}', tu dong xoa component thua.");
+                Destroy(this);
+                return;
+            }
+
+            Instance = this;
             Time.timeScale = 1f;
             currentState = GameState.Playing;
 
@@ -87,28 +100,48 @@ namespace SurvivorGame.Systems
         private void OnEnable()
         {
             EnemyController.OnAnyEnemyDied += HandleEnemyDied;
+
+            if (upgradeManager != null)
+            {
+                upgradeManager.OnUpgradeChoicesReady += HandleUpgradeChoicesReady;
+                upgradeManager.OnUpgradeMenuClosed += HandleUpgradeMenuClosed;
+            }
         }
 
         private void OnDisable()
         {
             EnemyController.OnAnyEnemyDied -= HandleEnemyDied;
+
+            if (upgradeManager != null)
+            {
+                upgradeManager.OnUpgradeChoicesReady -= HandleUpgradeChoicesReady;
+                upgradeManager.OnUpgradeMenuClosed -= HandleUpgradeMenuClosed;
+            }
         }
 
         private void OnDestroy()
         {
             Time.timeScale = 1f;
+            if (Instance == this)
+            {
+                Instance = null;
+            }
         }
 
         private void Update()
         {
-            // Bắt phím ESC để tạm dừng / tiếp tục (bỏ qua nếu đang mở bảng chọn nâng cấp)
-            if (Input.GetKeyDown(KeyCode.Escape))
+            // Bắt phím ESC để tạm dừng / tiếp tục (trạng thái LevelUp tự động chặn ESC)
+            if (Input.GetKeyDown(KeyCode.Escape) &&
+                (currentState == GameState.Playing || currentState == GameState.Paused))
             {
-                bool isUpgrading = upgradeManager != null && upgradeManager.IsChoosingUpgrade;
-                if (!isUpgrading && (currentState == GameState.Playing || currentState == GameState.Paused))
-                {
-                    TogglePause();
-                }
+                TogglePause();
+            }
+
+            // Chết đúng lúc đang mở bảng chọn nâng cấp vẫn phải kết thúc trận
+            if (currentState == GameState.LevelUp && playerHealth != null && playerHealth.IsDead)
+            {
+                TriggerGameOver();
+                return;
             }
 
             if (currentState != GameState.Playing) return;
@@ -123,10 +156,32 @@ namespace SurvivorGame.Systems
             // Đồng bộ thời gian sinh tồn với EnemySpawner
             survivalTime = enemySpawner != null ? enemySpawner.ElapsedTime : survivalTime + Time.deltaTime;
 
-            // Kiểm tra điều kiện chiến thắng
+            // Kiểm tra điều kiện chiến thắng theo thời gian (chỉ chạy nếu victorySurvivalTime > 0)
             if (victorySurvivalTime > 0f && survivalTime >= victorySurvivalTime)
             {
                 TriggerVictory();
+            }
+        }
+
+        /// <summary>
+        /// Bảng chọn nâng cấp vừa mở: chuyển sang trạng thái LevelUp và dừng thời gian.
+        /// </summary>
+        private void HandleUpgradeChoicesReady(IReadOnlyList<UpgradeOption> choices)
+        {
+            if (currentState == GameState.Playing)
+            {
+                SetState(GameState.LevelUp, 0f);
+            }
+        }
+
+        /// <summary>
+        /// Bảng chọn nâng cấp đã đóng: chỉ tiếp tục chơi nếu game vẫn đang ở LevelUp (không ghi đè GameOver/Victory).
+        /// </summary>
+        private void HandleUpgradeMenuClosed()
+        {
+            if (currentState == GameState.LevelUp)
+            {
+                SetState(GameState.Playing, 1f);
             }
         }
 
@@ -139,6 +194,12 @@ namespace SurvivorGame.Systems
             score += points;
 
             OnScoreAndKillsChanged?.Invoke(score, killCount);
+
+            // Hạ Boss = chiến thắng. Gọi sau khi đã cộng điểm Boss để kỷ lục được lưu đúng.
+            if (deadEnemy != null && deadEnemy.CompareTag("Boss"))
+            {
+                TriggerVictory();
+            }
         }
 
         public void TogglePause()

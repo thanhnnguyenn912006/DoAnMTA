@@ -189,6 +189,9 @@ namespace SurvivorGame.Enemies
 
         private void HandleEnemyDied(EnemyController deadEnemy)
         {
+            // Boss không do EnemySpawner sinh ra nên không được trừ vào bộ đếm giới hạn quái
+            if (deadEnemy == null || deadEnemy.CompareTag("Boss")) return;
+
             activeEnemyCount = Mathf.Max(0, activeEnemyCount - 1);
         }
 
