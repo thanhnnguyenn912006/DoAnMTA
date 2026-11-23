@@ -15,7 +15,7 @@ MonoBehaviour:
   weaponId: auto_gun
   weaponName: "\u0110\u1EA1n T\u1EF1 Nh\u1EAFm"
   weaponType: 0
-  icon: {fileID: 0}
+  icon: {fileID: 5648062980654012990, guid: 09b864452c96c9c47a1159e98f5ea1bc, type: 3}
   projectilePrefab: {fileID: 5937978022321881718, guid: a3add8c316741da40b53fb7469e2eaf2, type: 3}
   levels:
   - damage: 15

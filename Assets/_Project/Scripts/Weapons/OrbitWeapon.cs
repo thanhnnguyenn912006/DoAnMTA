@@ -47,6 +47,8 @@ namespace SurvivorGame.Weapons
         /// <summary>
         /// Vũ khí quỹ đạo hoạt động liên tục nên không dùng chu kỳ bắn Attack() mặc định.
         /// </summary>
+        protected override bool UsesCooldown => false;
+
         protected override bool Attack()
         {
             return false;
@@ -85,7 +87,7 @@ namespace SurvivorGame.Weapons
             WeaponLevelStats stats = CurrentStats;
             int targetCount = Mathf.Max(1, stats.projectileCount);
             int damage = GetEffectiveDamage();
-            float hitCooldown = Mathf.Max(0.15f, stats.cooldown);
+            float hitCooldown = Mathf.Max(0.15f, GetEffectiveCooldown());
 
             // Tạo thêm nếu chưa đủ số lượng cho cấp mới
             while (_orbs.Count < targetCount)

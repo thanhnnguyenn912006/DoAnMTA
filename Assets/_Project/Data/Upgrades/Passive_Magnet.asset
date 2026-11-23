@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SurvivorGame.Data.PassiveUpgradeData
   upgradeId: passive_magnet
   upgradeName: Nam Cham
-  icon: {fileID: 0}
+  icon: {fileID: -2671902647485551982, guid: b95c572cac7171843bf00699a2199b7d, type: 3}
   description: Tang +1.0 pham vi hut ngoc EXP
   upgradeType: 3
   maxLevel: 5

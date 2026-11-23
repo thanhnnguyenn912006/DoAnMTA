@@ -15,7 +15,7 @@ MonoBehaviour:
   weaponId: area_pulse
   weaponName: Song Xung Kich
   weaponType: 2
-  icon: {fileID: 0}
+  icon: {fileID: -1560586196681343199, guid: 85c8b3acdc87382448439a47f5684b82, type: 3}
   projectilePrefab: {fileID: 0}
   levels:
   - damage: 14

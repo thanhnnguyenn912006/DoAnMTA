@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SurvivorGame.Data.PassiveUpgradeData
   upgradeId: passive_dmg
   upgradeName: Suc Manh
-  icon: {fileID: 0}
+  icon: {fileID: 6720371789256062168, guid: b2ed658bce4223141b687b9b855a6dce, type: 3}
   description: Tang +15% sat thuong cho tat ca vu khi
   upgradeType: 0
   maxLevel: 5
