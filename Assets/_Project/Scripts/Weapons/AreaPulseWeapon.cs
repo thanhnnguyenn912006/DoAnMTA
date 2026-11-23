@@ -20,7 +20,7 @@ namespace SurvivorGame.Weapons
         [SerializeField, Min(0.05f)] private float pulseVisualDuration = 0.35f;
 
         // Bộ đệm quét cấp phát 1 lần duy nhất để giữ 0 GC Alloc
-        private readonly Collider2D[] _hitBuffer = new Collider2D[128];
+        private readonly Collider2D[] _hitBuffer = new Collider2D[160];
         private ContactFilter2D _enemyFilter;
 
         private bool _isAnimatingPulse;

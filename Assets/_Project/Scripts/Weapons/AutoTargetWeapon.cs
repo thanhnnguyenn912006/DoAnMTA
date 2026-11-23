@@ -20,7 +20,7 @@ namespace SurvivorGame.Weapons
         [SerializeField, Min(0)] private int prewarmCount = 40;
 
         // Bộ đệm cấp phát 1 lần duy nhất để tránh sinh rác bộ nhớ (GC) khi quét quái
-        private readonly Collider2D[] _hitBuffer = new Collider2D[64];
+        private readonly Collider2D[] _hitBuffer = new Collider2D[160];
         private ContactFilter2D _enemyFilter;
         private ComponentPool<Projectile> _projectilePool;
 
