@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 893874dbc745839438e996667f65bfe7, type: 3}
   m_Name: EnemyData_Ranged
   m_EditorClassIdentifier: Assembly-CSharp::SurvivorGame.Data.EnemyData
-  enemyId: Quai Ban Xa
-  enemyName: 
+  enemyId: enemy_ranged
+  enemyName: Quai Ban Xa
   maxHealth: 25
   moveSpeed: 2.5
   contactDamage: 8
