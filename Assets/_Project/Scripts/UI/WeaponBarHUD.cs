@@ -26,6 +26,8 @@ namespace SurvivorGame.UI
 
         [Header("Cấu hình ô hiển thị")]
         [SerializeField, Min(24f)] private float slotSize = 46f;
+        [SerializeField] private Sprite slotSprite;
+        [SerializeField] private Material levelTextMaterial;
         [SerializeField] private Color weaponSlotBgColor = new Color(0.10f, 0.16f, 0.26f, 0.85f);
         [SerializeField] private Color passiveSlotBgColor = new Color(0.20f, 0.14f, 0.28f, 0.85f);
         [SerializeField] private Color normalLevelColor = Color.white;
@@ -188,6 +190,11 @@ namespace SurvivorGame.UI
             layoutElement.preferredHeight = slotSize;
 
             Image bgImage = rootObj.GetComponent<Image>();
+            if (slotSprite != null)
+            {
+                bgImage.sprite = slotSprite;
+                bgImage.type = Image.Type.Sliced;
+            }
             bgImage.raycastTarget = false;
 
             // Icon ở giữa ô
@@ -215,6 +222,10 @@ namespace SurvivorGame.UI
             labelRect.offsetMax = new Vector2(-3f, 0f);
 
             TextMeshProUGUI labelText = labelObj.GetComponent<TextMeshProUGUI>();
+            if (levelTextMaterial != null)
+            {
+                labelText.fontSharedMaterial = levelTextMaterial;
+            }
             labelText.fontSize = 13f;
             labelText.fontStyle = FontStyles.Bold;
             labelText.alignment = TextAlignmentOptions.BottomRight;
