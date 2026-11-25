@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using SurvivorGame.Data;
 using SurvivorGame.Systems;
 
@@ -6,7 +7,7 @@ namespace SurvivorGame.Enemies
 {
     /// <summary>
     /// Quản lý việc sinh quái tự động ngoài rìa màn hình Camera theo đường cong độ khó và giới hạn số lượng tối đa.
-    /// Hỗ trợ Object Pooling cho nhiều loại Prefab quái khác nhau thông qua EnemyData.CustomPrefab.
+    /// Hỗ trợ Object Pooling cho nhiều loại Prefab quái khác nhau và dời quái bị rớt lại quá xa ngoài màn hình.
     /// </summary>
     public class EnemySpawner : MonoBehaviour
     {
@@ -20,13 +21,19 @@ namespace SurvivorGame.Enemies
         [SerializeField] private bool useObjectPooling = true;
         [SerializeField, Min(0)] private int prewarmCount = 80;
 
+        [Header("Chống kẹt ngoài màn hình")]
+        [SerializeField, Min(12f)] private float maxEnemyDistance = 24f;
+        [SerializeField, Min(0.1f)] private float relocateCheckInterval = 0.5f;
+
         [Header("Trạng thái (chỉ đọc để theo dõi trong Inspector)")]
         [SerializeField] private float elapsedTime;
         [SerializeField] private int activeEnemyCount;
         [SerializeField] private bool isSpawning = true;
 
         private float _spawnTimer;
+        private float _relocateTimer;
         private ComponentPool<EnemyController> _defaultEnemyPool;
+        private readonly List<EnemyController> _activeEnemies = new List<EnemyController>(160);
 
         public float ElapsedTime => elapsedTime;
         public int ActiveEnemyCount => activeEnemyCount;
@@ -70,7 +77,14 @@ namespace SurvivorGame.Enemies
 
         private void Update()
         {
-            if (!isSpawning || spawnConfig == null || enemyPrefab == null || playerTransform == null || mainCamera == null)
+            if (playerTransform == null || mainCamera == null)
+            {
+                return;
+            }
+
+            UpdateOutOfRangeEnemies();
+
+            if (!isSpawning || spawnConfig == null || enemyPrefab == null)
             {
                 return;
             }
@@ -87,6 +101,54 @@ namespace SurvivorGame.Enemies
 
             _spawnTimer = currentPhase.spawnInterval;
             SpawnBatch(currentPhase);
+        }
+
+        private void UpdateOutOfRangeEnemies()
+        {
+            if (_activeEnemies.Count == 0) return;
+
+            _relocateTimer -= Time.deltaTime;
+            if (_relocateTimer > 0f) return;
+            _relocateTimer = relocateCheckInterval;
+
+            Vector3 playerPos = playerTransform.position;
+            float maxDistSqr = maxEnemyDistance * maxEnemyDistance;
+
+            for (int i = _activeEnemies.Count - 1; i >= 0; i--)
+            {
+                EnemyController enemy = _activeEnemies[i];
+                if (enemy == null || !enemy.gameObject.activeInHierarchy)
+                {
+                    RemoveActiveEnemyAt(i);
+                    continue;
+                }
+
+                Vector3 diff = enemy.transform.position - playerPos;
+                diff.z = 0f;
+                if (diff.sqrMagnitude > maxDistSqr)
+                {
+                    RelocateEnemy(enemy, GetSpawnPositionOutsideCamera());
+                }
+            }
+
+            activeEnemyCount = _activeEnemies.Count;
+        }
+
+        private static void RelocateEnemy(EnemyController enemy, Vector3 newPos)
+        {
+            enemy.transform.position = newPos;
+            if (enemy.TryGetComponent<Rigidbody2D>(out Rigidbody2D rb))
+            {
+                rb.position = new Vector2(newPos.x, newPos.y);
+                rb.linearVelocity = Vector2.zero;
+            }
+        }
+
+        private void RemoveActiveEnemyAt(int index)
+        {
+            int lastIndex = _activeEnemies.Count - 1;
+            _activeEnemies[index] = _activeEnemies[lastIndex];
+            _activeEnemies.RemoveAt(lastIndex);
         }
 
         private void SpawnBatch(SpawnPhase phase)
@@ -135,7 +197,12 @@ namespace SurvivorGame.Enemies
                 enemy.Initialize(data, playerTransform, hpMult, speedMult, dmgMult, null);
             }
 
-            activeEnemyCount++;
+            if (!_activeEnemies.Contains(enemy))
+            {
+                _activeEnemies.Add(enemy);
+            }
+
+            activeEnemyCount = _activeEnemies.Count;
         }
 
         private EnemyController ResolvePrefab(EnemyData data)
@@ -192,7 +259,13 @@ namespace SurvivorGame.Enemies
             // Boss không do EnemySpawner sinh ra nên không được trừ vào bộ đếm giới hạn quái
             if (deadEnemy == null || deadEnemy.CompareTag("Boss")) return;
 
-            activeEnemyCount = Mathf.Max(0, activeEnemyCount - 1);
+            int index = _activeEnemies.IndexOf(deadEnemy);
+            if (index >= 0)
+            {
+                RemoveActiveEnemyAt(index);
+            }
+
+            activeEnemyCount = _activeEnemies.Count;
         }
 
         public void SetSpawning(bool active)
@@ -225,6 +298,10 @@ namespace SurvivorGame.Enemies
             Gizmos.color = Color.cyan;
             Vector3 center = new Vector3(cam.transform.position.x, cam.transform.position.y, 0f);
             Gizmos.DrawWireCube(center, new Vector3(halfW * 2f, halfH * 2f, 0f));
+
+            Gizmos.color = Color.yellow;
+            Vector3 playerCenter = playerTransform != null ? playerTransform.position : center;
+            Gizmos.DrawWireSphere(playerCenter, maxEnemyDistance);
         }
     }
 }

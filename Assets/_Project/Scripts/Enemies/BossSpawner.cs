@@ -6,7 +6,7 @@ using SurvivorGame.Systems;
 namespace SurvivorGame.Enemies
 {
     /// <summary>
-    /// Quản lý thời điểm triệu hồi Boss, tăng sức mạnh Boss ở các đợt sau và phát sự kiện cho thanh máu Boss.
+    /// Quản lý thời điểm triệu hồi Boss, tăng sức mạnh Boss ở các đợt sau, chống bỏ rơi Boss ngoài màn hình và phát sự kiện cho thanh máu Boss.
     /// </summary>
     public class BossSpawner : MonoBehaviour
     {
@@ -20,12 +20,18 @@ namespace SurvivorGame.Enemies
         [SerializeField, Min(30f)] private float repeatInterval = 120f;
         [SerializeField, Min(0f)] private float hpScalePerEncounter = 0.45f;
 
+        [Header("Chống bỏ rơi Boss ngoài màn hình")]
+        [SerializeField, Min(14f)] private float maxBossDistance = 26f;
+        [SerializeField, Min(0.1f)] private float relocateCheckInterval = 0.5f;
+
         [Header("Trạng thái (chỉ đọc)")]
         [SerializeField] private int bossesSpawnedCount;
         [SerializeField] private bool hasActiveBoss;
 
         private EnemyController _activeBoss;
+        private Transform _cachedPlayerTransform;
         private float _nextBossTime;
+        private float _relocateTimer;
 
         public bool HasActiveBoss => hasActiveBoss;
         public EnemyController ActiveBoss => _activeBoss;
@@ -55,7 +61,13 @@ namespace SurvivorGame.Enemies
 
         private void Update()
         {
-            if (hasActiveBoss || enemySpawner == null || bossData == null || bossPrefab == null)
+            if (hasActiveBoss)
+            {
+                UpdateActiveBossDistance();
+                return;
+            }
+
+            if (enemySpawner == null || bossData == null || bossPrefab == null)
             {
                 return;
             }
@@ -66,17 +78,57 @@ namespace SurvivorGame.Enemies
             }
         }
 
+        private void UpdateActiveBossDistance()
+        {
+            if (_activeBoss == null || !_activeBoss.gameObject.activeInHierarchy) return;
+
+            _relocateTimer -= Time.deltaTime;
+            if (_relocateTimer > 0f) return;
+            _relocateTimer = relocateCheckInterval;
+
+            Transform playerTransform = ResolvePlayerTransform();
+            if (playerTransform == null) return;
+
+            Vector3 diff = _activeBoss.transform.position - playerTransform.position;
+            diff.z = 0f;
+            if (diff.sqrMagnitude <= maxBossDistance * maxBossDistance) return;
+
+            Vector3 newPos = enemySpawner != null
+                ? enemySpawner.GetSpawnPositionOutsideCamera()
+                : playerTransform.position + new Vector3(10f, 0f, 0f);
+
+            _activeBoss.transform.position = newPos;
+            if (_activeBoss.TryGetComponent<Rigidbody2D>(out Rigidbody2D rb))
+            {
+                rb.position = new Vector2(newPos.x, newPos.y);
+                rb.linearVelocity = Vector2.zero;
+            }
+        }
+
+        private Transform ResolvePlayerTransform()
+        {
+            if (_cachedPlayerTransform != null) return _cachedPlayerTransform;
+
+            if (enemySpawner != null && enemySpawner.PlayerTransform != null)
+            {
+                _cachedPlayerTransform = enemySpawner.PlayerTransform;
+                return _cachedPlayerTransform;
+            }
+
+            GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+            if (playerObj != null)
+            {
+                _cachedPlayerTransform = playerObj.transform;
+            }
+
+            return _cachedPlayerTransform;
+        }
+
         public void SpawnBoss()
         {
             if (hasActiveBoss || bossData == null || bossPrefab == null) return;
 
-            Transform playerTransform = enemySpawner != null ? enemySpawner.PlayerTransform : null;
-            if (playerTransform == null)
-            {
-                GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
-                if (playerObj != null) playerTransform = playerObj.transform;
-            }
-
+            Transform playerTransform = ResolvePlayerTransform();
             if (playerTransform == null) return;
 
             Vector3 spawnPos = enemySpawner != null
