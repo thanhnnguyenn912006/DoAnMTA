@@ -14,7 +14,12 @@ namespace SurvivorGame.Systems
         BossDefeat,
         Victory,
         GameOver,
-        ButtonClick
+        ButtonClick,
+        Dash,
+        PickupHeal,
+        PickupMagnet,
+        WeaponEvolve,
+        BossWarning
     }
 
     /// <summary>
@@ -39,6 +44,11 @@ namespace SurvivorGame.Systems
                 SoundId.Victory => CreateArpeggio("SFX_Victory", new[] { 523.25f, 659.25f, 783.99f, 987.77f, 1046.50f }, 0.13f, 0.50f),
                 SoundId.GameOver => CreateArpeggio("SFX_GameOver", new[] { 329.63f, 293.66f, 246.94f, 196.00f }, 0.18f, 0.45f),
                 SoundId.ButtonClick => CreateSweep("SFX_ButtonClick", 0.045f, 760f, 520f, 0.30f, 2.5f, 0.05f, 110),
+                SoundId.Dash => CreateSweep("SFX_Dash", 0.11f, 680f, 220f, 0.38f, 2.0f, 0.35f, 111),
+                SoundId.PickupHeal => CreateArpeggio("SFX_PickupHeal", new[] { 523.25f, 659.25f, 783.99f }, 0.065f, 0.42f),
+                SoundId.PickupMagnet => CreateSweep("SFX_PickupMagnet", 0.24f, 260f, 920f, 0.42f, 1.3f, 0.08f, 112),
+                SoundId.WeaponEvolve => CreateArpeggio("SFX_WeaponEvolve", new[] { 523.25f, 659.25f, 783.99f, 1046.50f, 1318.51f }, 0.09f, 0.50f),
+                SoundId.BossWarning => CreateBossSiren("SFX_BossWarning", 0.65f, 0.45f),
                 _ => CreateSweep("SFX_Default", 0.05f, 440f, 320f, 0.3f, 2f, 0f, 100)
             };
         }

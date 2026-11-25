@@ -26,6 +26,11 @@ namespace SurvivorGame.Systems
         [SerializeField] private AudioClip customVictoryClip;
         [SerializeField] private AudioClip customGameOverClip;
         [SerializeField] private AudioClip customButtonClickClip;
+        [SerializeField] private AudioClip customDashClip;
+        [SerializeField] private AudioClip customPickupHealClip;
+        [SerializeField] private AudioClip customPickupMagnetClip;
+        [SerializeField] private AudioClip customWeaponEvolveClip;
+        [SerializeField] private AudioClip customBossWarningClip;
 
         [Header("Cấu hình bộ phát")]
         [SerializeField, Range(0f, 1f)] private float defaultBgmVolume = 0.45f;
@@ -98,6 +103,11 @@ namespace SurvivorGame.Systems
             RegisterClip(SoundId.Victory, customVictoryClip);
             RegisterClip(SoundId.GameOver, customGameOverClip);
             RegisterClip(SoundId.ButtonClick, customButtonClickClip);
+            RegisterClip(SoundId.Dash, customDashClip);
+            RegisterClip(SoundId.PickupHeal, customPickupHealClip);
+            RegisterClip(SoundId.PickupMagnet, customPickupMagnetClip);
+            RegisterClip(SoundId.WeaponEvolve, customWeaponEvolveClip);
+            RegisterClip(SoundId.BossWarning, customBossWarningClip);
         }
 
         private void RegisterClip(SoundId id, AudioClip customClip)
@@ -165,6 +175,10 @@ namespace SurvivorGame.Systems
                 case SoundId.Victory:
                 case SoundId.GameOver:
                 case SoundId.ButtonClick:
+                case SoundId.PickupHeal:
+                case SoundId.PickupMagnet:
+                case SoundId.WeaponEvolve:
+                case SoundId.BossWarning:
                     return true;
                 default:
                     return false;

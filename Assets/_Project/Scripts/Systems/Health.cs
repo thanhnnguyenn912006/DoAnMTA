@@ -80,6 +80,15 @@ namespace SurvivorGame.Systems
             OnHealthChanged?.Invoke(_currentHealth, maxHealth);
         }
 
+        /// <summary>
+        /// Cấp bất tử ngắn (ví dụ khi Lướt) mà không rút ngắn i-frame hiện có và không kích hoạt hiệu ứng trúng đòn.
+        /// </summary>
+        public void GrantInvincibility(float duration)
+        {
+            if (duration <= 0f || IsDead) return;
+            _invincibilityTimer = Mathf.Max(_invincibilityTimer, duration);
+        }
+
         public void TakeDamage(int amount)
         {
             if (amount <= 0 || IsDead || IsInvincible) return;

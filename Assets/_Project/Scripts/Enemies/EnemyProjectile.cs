@@ -88,8 +88,9 @@ namespace SurvivorGame.Enemies
             if (_hasHit) return;
             if (((1 << other.gameObject.layer) & targetLayer.value) == 0) return;
 
-            if (other.TryGetComponent<Health>(out Health targetHealth) && !targetHealth.IsDead)
+            if (other.TryGetComponent<Health>(out Health targetHealth))
             {
+                if (targetHealth.IsDead || targetHealth.IsInvincible) return;
                 targetHealth.TakeDamage(_damage);
             }
 
