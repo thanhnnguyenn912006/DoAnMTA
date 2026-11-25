@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: WeaponData_Orbit
   m_EditorClassIdentifier: Assembly-CSharp::SurvivorGame.Data.WeaponData
   weaponId: orbit_orb
-  weaponName: Cau Nang Luong
+  weaponName: "C\u1EA7u N\u0103ng L\u01B0\u1EE3ng"
   weaponType: 1
   icon: {fileID: 8356996994502336146, guid: 7da328f4fa3d7c14889aa31b1cde8b12, type: 3}
   projectilePrefab: {fileID: 4904191101849758756, guid: 3613a74df81e7e5459501bd0c0241f01, type: 3}

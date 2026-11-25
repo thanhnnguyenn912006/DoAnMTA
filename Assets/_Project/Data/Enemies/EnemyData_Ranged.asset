@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: EnemyData_Ranged
   m_EditorClassIdentifier: Assembly-CSharp::SurvivorGame.Data.EnemyData
   enemyId: enemy_ranged
-  enemyName: Quai Ban Xa
+  enemyName: "Qu\xE1i b\u1EAFn xa"
   maxHealth: 25
   moveSpeed: 2.5
   contactDamage: 8

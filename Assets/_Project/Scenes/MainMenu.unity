@@ -669,7 +669,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'KY LUC: 0 DIEM | LAU NHAT: 00:00'
+  m_text: "K\u1EF6 L\u1EE4C: 0 \u0110I\u1EC2M | L\xC2U NH\u1EA4T: 00:00"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 81ae04ba477de63489515395a58cfe53, type: 2}
   m_sharedMaterial: {fileID: -7077954027361140263, guid: 81ae04ba477de63489515395a58cfe53, type: 2}

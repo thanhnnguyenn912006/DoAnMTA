@@ -71,12 +71,12 @@ namespace SurvivorGame.UI
         {
             if (bgmValueText != null)
             {
-                bgmValueText.text = $"NHAC NEN: {Mathf.RoundToInt(bgm * 100f)}%";
+                bgmValueText.text = $"NHẠC NỀN: {Mathf.RoundToInt(bgm * 100f)}%";
             }
 
             if (sfxValueText != null)
             {
-                sfxValueText.text = $"HIEU UNG: {Mathf.RoundToInt(sfx * 100f)}%";
+                sfxValueText.text = $"HIỆU ỨNG: {Mathf.RoundToInt(sfx * 100f)}%";
             }
         }
     }
