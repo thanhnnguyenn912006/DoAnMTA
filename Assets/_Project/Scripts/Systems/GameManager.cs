@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -34,6 +35,7 @@ namespace SurvivorGame.Systems
 
         [Header("Cấu hình trận đấu")]
         [SerializeField, Min(0f)] private float victorySurvivalTime = 0f; // 0 = tắt thắng theo thời gian (thắng khi hạ Boss)
+        [SerializeField, Min(0f)] private float victoryDelayAfterBoss = 0.65f; // Chờ hiệu ứng nổ Boss & rung camera chạy xong
         [SerializeField] private string mainMenuSceneName = "MainMenu";
 
         [Header("Trạng thái (chỉ đọc để theo dõi)")]
@@ -41,6 +43,9 @@ namespace SurvivorGame.Systems
         [SerializeField] private int score;
         [SerializeField] private int killCount;
         [SerializeField] private float survivalTime;
+
+        private bool _isPendingVictory;
+        private Coroutine _victoryDelayCoroutine;
 
         public GameState CurrentState => currentState;
         public int Score => score;
@@ -66,6 +71,7 @@ namespace SurvivorGame.Systems
             Instance = this;
             Time.timeScale = 1f;
             currentState = GameState.Playing;
+            _isPendingVictory = false;
 
             if (playerHealth == null)
             {
@@ -121,6 +127,12 @@ namespace SurvivorGame.Systems
 
         private void OnDestroy()
         {
+            if (_victoryDelayCoroutine != null)
+            {
+                StopCoroutine(_victoryDelayCoroutine);
+                _victoryDelayCoroutine = null;
+            }
+
             Time.timeScale = 1f;
             if (Instance == this)
             {
@@ -130,6 +142,9 @@ namespace SurvivorGame.Systems
 
         private void Update()
         {
+            // Đang trong nhịp chờ hiệu ứng nổ Boss thì khóa Pause, đồng hồ và điều kiện thua
+            if (_isPendingVictory) return;
+
             // Bắt phím ESC để tạm dừng / tiếp tục (trạng thái LevelUp tự động chặn ESC)
             if (Input.GetKeyDown(KeyCode.Escape) &&
                 (currentState == GameState.Playing || currentState == GameState.Paused))
@@ -168,6 +183,8 @@ namespace SurvivorGame.Systems
         /// </summary>
         private void HandleUpgradeChoicesReady(IReadOnlyList<UpgradeOption> choices)
         {
+            if (_isPendingVictory) return;
+
             if (currentState == GameState.Playing)
             {
                 SetState(GameState.LevelUp, 0f);
@@ -195,15 +212,58 @@ namespace SurvivorGame.Systems
 
             OnScoreAndKillsChanged?.Invoke(score, killCount);
 
-            // Hạ Boss = chiến thắng. Gọi sau khi đã cộng điểm Boss để kỷ lục được lưu đúng.
-            if (deadEnemy != null && deadEnemy.CompareTag("Boss"))
+            // Hạ Boss = chiến thắng sau 1 nhịp ngắn để thấy trọn hiệu ứng nổ và rung camera.
+            if (!_isPendingVictory && deadEnemy != null && deadEnemy.CompareTag("Boss"))
+            {
+                BeginDelayedVictory();
+            }
+        }
+
+        private void BeginDelayedVictory()
+        {
+            if (_isPendingVictory || currentState == GameState.GameOver || currentState == GameState.Victory)
+            {
+                return;
+            }
+
+            _isPendingVictory = true;
+
+            if (enemySpawner != null)
+            {
+                enemySpawner.SetSpawning(false);
+            }
+
+            // Tắt va chạm Player trong 0.65s chờ để không mất máu/nhặt EXP gây ngắt nhịp chiến thắng
+            if (playerHealth != null && playerHealth.TryGetComponent<Collider2D>(out Collider2D playerCollider))
+            {
+                playerCollider.enabled = false;
+            }
+
+            if (upgradeManager != null)
+            {
+                upgradeManager.CancelAllPendingUpgrades();
+            }
+
+            if (victoryDelayAfterBoss <= 0f)
             {
                 TriggerVictory();
+                return;
             }
+
+            _victoryDelayCoroutine = StartCoroutine(DelayedVictoryRoutine());
+        }
+
+        private IEnumerator DelayedVictoryRoutine()
+        {
+            yield return new WaitForSecondsRealtime(victoryDelayAfterBoss);
+            _victoryDelayCoroutine = null;
+            TriggerVictory();
         }
 
         public void TogglePause()
         {
+            if (_isPendingVictory) return;
+
             if (currentState == GameState.Playing)
             {
                 SetState(GameState.Paused, 0f);
@@ -224,7 +284,7 @@ namespace SurvivorGame.Systems
 
         public void TriggerGameOver()
         {
-            if (currentState == GameState.GameOver || currentState == GameState.Victory) return;
+            if (_isPendingVictory || currentState == GameState.GameOver || currentState == GameState.Victory) return;
 
             SaveRecords();
             if (enemySpawner != null) enemySpawner.SetSpawning(false);
@@ -236,6 +296,13 @@ namespace SurvivorGame.Systems
         {
             if (currentState == GameState.GameOver || currentState == GameState.Victory) return;
 
+            if (_victoryDelayCoroutine != null)
+            {
+                StopCoroutine(_victoryDelayCoroutine);
+                _victoryDelayCoroutine = null;
+            }
+
+            _isPendingVictory = false;
             SaveRecords();
             if (enemySpawner != null) enemySpawner.SetSpawning(false);
             SetState(GameState.Victory, 0f);

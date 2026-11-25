@@ -1,12 +1,14 @@
 ﻿using System;
 using UnityEngine;
 using SurvivorGame.Data;
+using SurvivorGame.Player;
 using SurvivorGame.Systems;
+using SurvivorGame.Weapons;
 
 namespace SurvivorGame.Enemies
 {
     /// <summary>
-    /// Quản lý thời điểm triệu hồi Boss, tăng sức mạnh Boss ở các đợt sau, chống bỏ rơi Boss ngoài màn hình và phát sự kiện cho thanh máu Boss.
+    /// Quản lý thời điểm triệu hồi Boss, chống bỏ rơi Boss ngoài màn hình và phát sự kiện cho thanh máu Boss.
     /// </summary>
     public class BossSpawner : MonoBehaviour
     {
@@ -16,9 +18,15 @@ namespace SurvivorGame.Enemies
         [SerializeField] private EnemyController bossPrefab;
 
         [Header("Lịch xuất hiện Boss")]
-        [SerializeField, Min(5f)] private float firstBossTime = 90f;
-        [SerializeField, Min(30f)] private float repeatInterval = 120f;
-        [SerializeField, Min(0f)] private float hpScalePerEncounter = 0.45f;
+        [SerializeField, Min(5f)] private float firstBossTime = 150f;
+
+        [Header("Chế độ Vô tận (mặc định tắt vì hạ Boss đợt 1 là Chiến thắng)")]
+        [SerializeField, Tooltip("Bật nếu muốn triệu hồi thêm Boss lặp lại sau khi hạ Boss đầu tiên.")]
+        private bool enableEndlessRepeat = false;
+        [SerializeField, Min(30f), Tooltip("Chỉ có tác dụng khi bật Enable Endless Repeat.")]
+        private float repeatInterval = 120f;
+        [SerializeField, Min(0f), Tooltip("Hệ số tăng máu Boss ở các đợt sau khi bật Enable Endless Repeat.")]
+        private float hpScalePerEncounter = 0.45f;
 
         [Header("Chống bỏ rơi Boss ngoài màn hình")]
         [SerializeField, Min(14f)] private float maxBossDistance = 26f;
@@ -64,6 +72,12 @@ namespace SurvivorGame.Enemies
             if (hasActiveBoss)
             {
                 UpdateActiveBossDistance();
+                return;
+            }
+
+            // Mặc định chỉ triệu hồi 1 Boss duy nhất nếu chưa bật chế độ Vô tận
+            if (!enableEndlessRepeat && bossesSpawnedCount > 0)
+            {
                 return;
             }
 
@@ -145,7 +159,7 @@ namespace SurvivorGame.Enemies
             hasActiveBoss = true;
             bossesSpawnedCount++;
 
-            if (enemySpawner != null)
+            if (enableEndlessRepeat && enemySpawner != null)
             {
                 _nextBossTime = enemySpawner.ElapsedTime + repeatInterval;
             }
@@ -170,7 +184,45 @@ namespace SurvivorGame.Enemies
         [ContextMenu("Test: Trieu hoi Boss ngay lap tuc")]
         private void TestSpawnBossNow()
         {
+            if (!Application.isPlaying) return;
             SpawnBoss();
+        }
+
+        [ContextMenu("Test: Bo vu khi Cap 4 & Trieu hoi Boss (Can bang HP)")]
+        private void TestMidLateGameBossFight()
+        {
+            if (!Application.isPlaying) return;
+
+            Transform playerTransform = ResolvePlayerTransform();
+            if (playerTransform != null)
+            {
+                PlayerStats stats = playerTransform.GetComponent<PlayerStats>();
+                WeaponBase[] weapons = playerTransform.GetComponentsInChildren<WeaponBase>(true);
+
+                for (int i = 0; i < weapons.Length; i++)
+                {
+                    WeaponBase weapon = weapons[i];
+                    if (weapon == null) continue;
+
+                    if (!weapon.gameObject.activeSelf)
+                    {
+                        weapon.gameObject.SetActive(true);
+                    }
+
+                    if (stats != null)
+                    {
+                        stats.ApplyMultipliersToWeapon(weapon);
+                    }
+
+                    while (!weapon.IsMaxLevel && weapon.CurrentLevel < 4)
+                    {
+                        weapon.LevelUp();
+                    }
+                }
+            }
+
+            SpawnBoss();
+            Debug.Log("[BossSpawner] Da kich hoat bai test can bang Boss (toan bo vu khi Cap 4).");
         }
     }
 }

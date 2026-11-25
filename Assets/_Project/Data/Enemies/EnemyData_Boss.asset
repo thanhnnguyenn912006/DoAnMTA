@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SurvivorGame.Data.EnemyData
   enemyId: boss_overlord
   enemyName: "BOSS - CH\xDAA T\u1EC2 B\xD3NG T\u1ED0I"
-  maxHealth: 650
+  maxHealth: 5000
   moveSpeed: 2.2
   contactDamage: 22
   expValue: 120
