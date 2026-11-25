@@ -7,7 +7,8 @@ namespace SurvivorGame.Data
         DamagePercent,     // Tăng % sát thương cho mọi vũ khí (VD: 0.15 = +15%)
         CooldownReduction, // Giảm % thời gian hồi chiêu (VD: 0.10 = -10%)
         MaxHealth,         // Tăng máu tối đa và hồi đúng lượng vừa tăng (VD: 20 = +20 HP)
-        MagnetRadius       // Tăng bán kính hút ngọc EXP (VD: 1.0 = +1.0 đơn vị)
+        MagnetRadius,      // Tăng bán kính hút ngọc EXP (VD: 1.0 = +1.0 đơn vị)
+        MoveSpeed          // Tăng tốc độ di chuyển (VD: 0.5 = +0.5 đơn vị/giây)
     }
 
     /// <summary>

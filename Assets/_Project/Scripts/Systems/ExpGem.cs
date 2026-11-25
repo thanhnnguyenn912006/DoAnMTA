@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using SurvivorGame.Player;
 
@@ -11,6 +12,8 @@ namespace SurvivorGame.Systems
     [RequireComponent(typeof(SpriteRenderer))]
     public class ExpGem : MonoBehaviour
     {
+        private static readonly List<ExpGem> _activeGems = new List<ExpGem>(128);
+
         [Header("Hiệu ứng hút (Magnet)")]
         [SerializeField, Min(1f)] private float initialPullSpeed = 4f;
         [SerializeField, Min(1f)] private float pullAcceleration = 22f;
@@ -30,9 +33,37 @@ namespace SurvivorGame.Systems
         private bool _isCollected;
         private float _currentPullSpeed;
 
+        public static int ActiveCount => _activeGems.Count;
+        public bool IsMagnetized => _isMagnetized;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetStaticState()
+        {
+            _activeGems.Clear();
+        }
+
         private void Awake()
         {
             _spriteRenderer = GetComponent<SpriteRenderer>();
+        }
+
+        private void OnEnable()
+        {
+            if (!_activeGems.Contains(this))
+            {
+                _activeGems.Add(this);
+            }
+        }
+
+        private void OnDisable()
+        {
+            int index = _activeGems.IndexOf(this);
+            if (index >= 0)
+            {
+                int lastIndex = _activeGems.Count - 1;
+                _activeGems[index] = _activeGems[lastIndex];
+                _activeGems.RemoveAt(lastIndex);
+            }
         }
 
         /// <summary>
@@ -49,6 +80,32 @@ namespace SurvivorGame.Systems
             _currentPullSpeed = initialPullSpeed;
 
             ApplyVisualByValue(_expValue);
+        }
+
+        /// <summary>
+        /// Hút toàn bộ ngọc EXP đang tồn tại trên sân về phía người chơi (0 GC Alloc).
+        /// </summary>
+        public static int MagnetizeAllActive(PlayerExperience collector)
+        {
+            if (collector == null) return 0;
+
+            int count = 0;
+            for (int i = 0; i < _activeGems.Count; i++)
+            {
+                ExpGem gem = _activeGems[i];
+                if (gem == null || gem._isCollected || !gem.gameObject.activeInHierarchy) continue;
+
+                if (gem._collector == null)
+                {
+                    gem._collector = collector;
+                }
+
+                gem._isMagnetized = true;
+                gem._currentPullSpeed = Mathf.Max(gem._currentPullSpeed, gem.initialPullSpeed * 1.6f);
+                count++;
+            }
+
+            return count;
         }
 
         private void Update()

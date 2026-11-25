@@ -9,19 +9,12 @@ namespace SurvivorGame.EditorTools
         private const string OutputFolder = "Assets/_Project/Art/Icons";
         private const int Size = 64;
 
-        [MenuItem("Tools/Survivor Arena/Tao 7 Icon Vu Khi & Nang Cap (PNG)")]
+        [MenuItem("Tools/Survivor Arena/Tao 8 Icon Vu Khi & Nang Cap (PNG)")]
         public static void GenerateAllIcons()
         {
             if (!Directory.Exists(OutputFolder))
             {
                 Directory.CreateDirectory(OutputFolder);
-            }
-
-            // Xóa file Icon_MoveSpeed.png thừa nếu trước đó đã lỡ tạo
-            string oldMoveSpeedPath = Path.Combine(OutputFolder, "Icon_MoveSpeed.png");
-            if (File.Exists(oldMoveSpeedPath))
-            {
-                AssetDatabase.DeleteAsset(oldMoveSpeedPath.Replace("\\", "/"));
             }
 
             SaveIcon("Icon_AutoGun.png", DrawAutoGun());
@@ -31,10 +24,11 @@ namespace SurvivorGame.EditorTools
             SaveIcon("Icon_Cooldown.png", DrawCooldown());
             SaveIcon("Icon_Magnet.png", DrawMagnet());
             SaveIcon("Icon_MaxHealth.png", DrawMaxHealth());
+            SaveIcon("Icon_MoveSpeed.png", DrawMoveSpeed());
 
             AssetDatabase.Refresh();
 
-            // Chuyển tự động toàn bộ 7 file PNG sang Sprite (2D and UI)
+            // Chuyển tự động toàn bộ 8 file PNG sang Sprite (2D and UI)
             string[] files = Directory.GetFiles(OutputFolder, "*.png");
             foreach (string file in files)
             {
@@ -49,7 +43,7 @@ namespace SurvivorGame.EditorTools
                 }
             }
 
-            Debug.Log($"[IconGenerator] Da tao xong 7 Sprite Icon tai: {OutputFolder}");
+            Debug.Log($"[IconGenerator] Da tao xong 8 Sprite Icon tai: {OutputFolder}");
         }
 
         private static Texture2D CreateBlank(Color bg)
@@ -85,6 +79,16 @@ namespace SurvivorGame.EditorTools
                 for (int x = x0; x < x0 + w; x++)
                     if (x >= 0 && x < Size && y >= 0 && y < Size)
                         tex.SetPixel(x, y, col);
+        }
+
+        private static void DrawChevronRight(Texture2D tex, int tipX, int centerY, int halfHeight, int thickness, Color col)
+        {
+            for (int dy = -halfHeight; dy <= halfHeight; dy++)
+            {
+                int y = centerY + dy;
+                int xRight = tipX - Mathf.Abs(dy);
+                DrawRect(tex, xRight - thickness, y, thickness, 1, col);
+            }
         }
 
         // 1. Đạn Tự Nhắm: Tâm ngắm xanh cyan
@@ -193,6 +197,26 @@ namespace SurvivorGame.EditorTools
             Color pink = new Color(1f, 0.35f, 0.50f, 1f);
             DrawRect(tex, 26, 12, 12, 40, pink);
             DrawRect(tex, 12, 26, 40, 12, pink);
+            tex.Apply();
+            return tex;
+        }
+
+        // 8. Tốc Chạy: Hai mũi tên bứt tốc xanh ngọc-lá kèm vệt gió
+        private static Texture2D DrawMoveSpeed()
+        {
+            var tex = CreateBlank(new Color(0.06f, 0.20f, 0.14f, 1f));
+            Color trail = new Color(0.20f, 0.80f, 0.50f, 0.85f);
+            Color bright = new Color(0.45f, 1f, 0.65f, 1f);
+
+            // Vệt gió phía sau
+            DrawRect(tex, 10, 41, 12, 3, trail);
+            DrawRect(tex, 8, 31, 14, 3, trail);
+            DrawRect(tex, 10, 21, 12, 3, trail);
+
+            // Hai mũi tên kép hướng phải (>>)
+            DrawChevronRight(tex, 36, 32, 16, 6, trail);
+            DrawChevronRight(tex, 52, 32, 16, 7, bright);
+
             tex.Apply();
             return tex;
         }

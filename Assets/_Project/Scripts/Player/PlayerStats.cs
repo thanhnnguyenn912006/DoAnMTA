@@ -24,6 +24,7 @@ namespace SurvivorGame.Player
 
         private Health _health;
         private PlayerExperience _experience;
+        private PlayerMovement _movement;
         private readonly Dictionary<PassiveUpgradeData, int> _passiveLevels = new Dictionary<PassiveUpgradeData, int>();
 
         public float DamageMultiplier => damageMultiplier;
@@ -33,6 +34,7 @@ namespace SurvivorGame.Player
         {
             _health = GetComponent<Health>();
             _experience = GetComponent<PlayerExperience>();
+            TryGetComponent(out _movement);
 
             if (weaponsContainer == null)
             {
@@ -80,6 +82,10 @@ namespace SurvivorGame.Player
 
                 case PassiveUpgradeType.MagnetRadius:
                     _experience.IncreaseMagnetRadius(data.ValuePerLevel);
+                    break;
+
+                case PassiveUpgradeType.MoveSpeed:
+                    _movement?.AddMoveSpeed(data.ValuePerLevel);
                     break;
             }
 
