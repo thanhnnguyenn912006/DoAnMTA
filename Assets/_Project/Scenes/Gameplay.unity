@@ -5169,7 +5169,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1364382478
 Transform:
   m_ObjectHideFlags: 0
@@ -6716,6 +6716,8 @@ MonoBehaviour:
   mainCamera: {fileID: 519420031}
   useObjectPooling: 1
   prewarmCount: 80
+  maxEnemyDistance: 24
+  relocateCheckInterval: 0.5
   elapsedTime: 0
   activeEnemyCount: 0
   isSpawning: 1
@@ -7040,6 +7042,7 @@ MonoBehaviour:
   playerExperience: {fileID: 1745635152}
   playerStats: {fileID: 1745635153}
   weaponsContainer: {fileID: 39616247}
+  gameManager: {fileID: 0}
   availablePassives:
   - {fileID: 11400000, guid: de06b4e6666ab34488e4e2d26c4e75ad, type: 2}
   - {fileID: 11400000, guid: db0e8c4b32700fa4591c6d4b94ddb43d, type: 2}
@@ -7280,6 +7283,8 @@ MonoBehaviour:
   firstBossTime: 150
   repeatInterval: 120
   hpScalePerEncounter: 0.45
+  maxBossDistance: 26
+  relocateCheckInterval: 0.5
   bossesSpawnedCount: 0
   hasActiveBoss: 0
 --- !u!4 &1862003497

@@ -33,6 +33,7 @@ namespace SurvivorGame.Systems
         [SerializeField] private PlayerExperience playerExperience;
         [SerializeField] private PlayerStats playerStats;
         [SerializeField] private Transform weaponsContainer;
+        [SerializeField] private GameManager gameManager;
 
         [Header("Danh sách nâng cấp bị động khả dụng")]
         [SerializeField] private PassiveUpgradeData[] availablePassives;
@@ -62,6 +63,11 @@ namespace SurvivorGame.Systems
                     if (weaponsContainer == null) weaponsContainer = playerObj.transform;
                 }
             }
+
+            if (gameManager == null)
+            {
+                gameManager = FindAnyObjectByType<GameManager>();
+            }
         }
 
         private void OnEnable()
@@ -69,6 +75,16 @@ namespace SurvivorGame.Systems
             if (playerExperience != null)
             {
                 playerExperience.OnLevelUp += HandleLevelUp;
+            }
+
+            if (gameManager == null)
+            {
+                gameManager = FindAnyObjectByType<GameManager>();
+            }
+
+            if (gameManager != null)
+            {
+                gameManager.OnGameStateChanged += HandleGameStateChanged;
             }
         }
 
@@ -78,10 +94,49 @@ namespace SurvivorGame.Systems
             {
                 playerExperience.OnLevelUp -= HandleLevelUp;
             }
+
+            if (gameManager != null)
+            {
+                gameManager.OnGameStateChanged -= HandleGameStateChanged;
+            }
+        }
+
+        private void HandleGameStateChanged(GameState newState)
+        {
+            if (newState == GameState.GameOver || newState == GameState.Victory)
+            {
+                CancelAllPendingUpgrades();
+            }
+        }
+
+        private bool IsGameEnded()
+        {
+            GameManager gm = gameManager != null ? gameManager : GameManager.Instance;
+            return gm != null && (gm.CurrentState == GameState.GameOver || gm.CurrentState == GameState.Victory);
+        }
+
+        /// <summary>
+        /// Hủy toàn bộ phiên chọn nâng cấp và các lượt lên cấp đang chờ khi trận đấu kết thúc.
+        /// </summary>
+        public void CancelAllPendingUpgrades()
+        {
+            _pendingLevelUps = 0;
+            _currentChoices.Clear();
+
+            if (_isChoosingUpgrade)
+            {
+                CloseUpgradeMenu();
+            }
+            else
+            {
+                OnUpgradeMenuClosed?.Invoke();
+            }
         }
 
         private void HandleLevelUp(int newLevel)
         {
+            if (IsGameEnded()) return;
+
             _pendingLevelUps++;
 
             if (!_isChoosingUpgrade)
@@ -92,6 +147,12 @@ namespace SurvivorGame.Systems
 
         private void OpenNextUpgradeChoice()
         {
+            if (IsGameEnded())
+            {
+                CancelAllPendingUpgrades();
+                return;
+            }
+
             BuildCandidatePool();
 
             if (_candidatePool.Count == 0)
@@ -120,6 +181,12 @@ namespace SurvivorGame.Systems
         /// </summary>
         public void SelectUpgrade(int choiceIndex)
         {
+            if (IsGameEnded())
+            {
+                CancelAllPendingUpgrades();
+                return;
+            }
+
             if (!_isChoosingUpgrade || choiceIndex < 0 || choiceIndex >= _currentChoices.Count)
             {
                 return;
@@ -152,7 +219,7 @@ namespace SurvivorGame.Systems
 
             _pendingLevelUps = Mathf.Max(0, _pendingLevelUps - 1);
 
-            if (_pendingLevelUps > 0)
+            if (_pendingLevelUps > 0 && !IsGameEnded())
             {
                 OpenNextUpgradeChoice();
             }

@@ -51,8 +51,8 @@ namespace SurvivorGame.UI
 
         private void Update()
         {
-            // Hỗ trợ phím tắt 1, 2, 3 chọn nhanh thẻ khi bảng đang mở (chạy được ngay cả khi Time.timeScale = 0)
-            if (!_isOpen) return;
+            // Chỉ nhận phím tắt 1, 2, 3 khi bảng thực sự đang mở và trận chưa kết thúc
+            if (!CanAcceptSelection()) return;
 
             if (_activeChoiceCount >= 1 && Input.GetKeyDown(KeyCode.Alpha1))
             {
@@ -68,9 +68,31 @@ namespace SurvivorGame.UI
             }
         }
 
+        private bool CanAcceptSelection()
+        {
+            if (!_isOpen || panelRoot == null || !panelRoot.activeInHierarchy)
+            {
+                return false;
+            }
+
+            if (GameManager.Instance != null && GameManager.Instance.CurrentState != GameState.LevelUp)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
         private void HandleChoicesReady(IReadOnlyList<UpgradeOption> choices)
         {
             if (panelRoot == null || cards == null) return;
+
+            if (GameManager.Instance != null &&
+                (GameManager.Instance.CurrentState == GameState.GameOver ||
+                 GameManager.Instance.CurrentState == GameState.Victory))
+            {
+                return;
+            }
 
             _activeChoiceCount = Mathf.Min(choices.Count, cards.Length);
 
@@ -105,7 +127,7 @@ namespace SurvivorGame.UI
 
         private void HandleCardSelected(int index)
         {
-            if (!_isOpen || upgradeManager == null) return;
+            if (!CanAcceptSelection() || upgradeManager == null) return;
             upgradeManager.SelectUpgrade(index);
         }
     }
