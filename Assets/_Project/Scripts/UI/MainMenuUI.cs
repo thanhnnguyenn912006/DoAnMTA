@@ -56,8 +56,8 @@ namespace SurvivorGame.UI
 
         private void HandleQuitClicked()
         {
-            Debug.Log("[MainMenuUI] Thoat tro choi.");
 #if UNITY_EDITOR
+            Debug.Log("[MainMenuUI] Thoat tro choi.");
             UnityEditor.EditorApplication.isPlaying = false;
 #else
             Application.Quit();
@@ -71,7 +71,9 @@ namespace SurvivorGame.UI
             PlayerPrefs.DeleteKey(GameManager.BestTimeKey);
             PlayerPrefs.Save();
             RefreshRecordDisplay();
+#if UNITY_EDITOR
             Debug.Log("[MainMenuUI] Da xoa ky luc.");
+#endif
         }
     }
 }

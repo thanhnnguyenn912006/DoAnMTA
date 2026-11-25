@@ -277,14 +277,18 @@ namespace SurvivorGame.Enemies
         private void TestSkipTime()
         {
             elapsedTime += 45f;
+#if UNITY_EDITOR
             Debug.Log($"[EnemySpawner] Đã tua thời gian lên: {elapsedTime:F0}s | HP x{spawnConfig.GetHpMultiplier(elapsedTime):F2}");
+#endif
         }
 
         [ContextMenu("Test: Stress Test (Nhảy thẳng lên 90s - Giai đoạn cao trào)")]
         private void TestJumpToHighIntensity()
         {
             elapsedTime = 90f;
+#if UNITY_EDITOR
             Debug.Log($"[EnemySpawner] Stress Test kích hoạt ở 90s | HP x{spawnConfig.GetHpMultiplier(elapsedTime):F2}");
+#endif
         }
 
         private void OnDrawGizmosSelected()

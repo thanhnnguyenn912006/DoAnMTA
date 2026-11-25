@@ -289,7 +289,9 @@ namespace SurvivorGame.Systems
             SaveRecords();
             if (enemySpawner != null) enemySpawner.SetSpawning(false);
             SetState(GameState.GameOver, 0f);
+#if UNITY_EDITOR
             Debug.Log($"[GameManager] GAME OVER | Diem: {score} | Da ha: {killCount} | Thoi gian: {FormatTime(survivalTime)}");
+#endif
         }
 
         public void TriggerVictory()
@@ -306,7 +308,9 @@ namespace SurvivorGame.Systems
             SaveRecords();
             if (enemySpawner != null) enemySpawner.SetSpawning(false);
             SetState(GameState.Victory, 0f);
+#if UNITY_EDITOR
             Debug.Log($"[GameManager] CHIEN THANG! | Diem: {score} | Da ha: {killCount} | Thoi gian: {FormatTime(survivalTime)}");
+#endif
         }
 
         public void RestartGameplay()

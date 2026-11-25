@@ -166,8 +166,10 @@ namespace SurvivorGame.Systems
 
             if (OnUpgradeChoicesReady == null)
             {
+#if UNITY_EDITOR
                 Debug.Log($"[UpgradeManager] Sinh {_currentChoices.Count} lựa chọn: " +
                           $"{_currentChoices[0].Title} ({_currentChoices[0].LevelText})...");
+#endif
                 _pendingLevelUps = 0;
                 return;
             }
@@ -204,12 +206,16 @@ namespace SurvivorGame.Systems
                     {
                         playerStats.ApplyMultipliersToWeapon(chosen.TargetWeapon);
                     }
+#if UNITY_EDITOR
                     Debug.Log($"[UpgradeManager] Đã mở khóa vũ khí mới '{chosen.Title}' (Cấp 1)");
+#endif
                 }
                 else
                 {
                     chosen.TargetWeapon.LevelUp();
+#if UNITY_EDITOR
                     Debug.Log($"[UpgradeManager] Đã nâng cấp vũ khí '{chosen.Title}' -> Cấp {chosen.TargetWeapon.CurrentLevel}");
+#endif
                 }
             }
             else if (!chosen.IsWeaponUpgrade && chosen.PassiveData != null && playerStats != null)

@@ -165,7 +165,9 @@ namespace SurvivorGame.Enemies
             }
 
             Health bossHealth = boss.GetComponent<Health>();
+#if UNITY_EDITOR
             Debug.Log($"[BossSpawner] BOSS XUAT HIEN: {bossData.EnemyName} (Dot {bossesSpawnedCount}, HP x{hpMult:F2})");
+#endif
             OnBossSpawned?.Invoke(boss, bossHealth);
         }
 
@@ -177,7 +179,9 @@ namespace SurvivorGame.Enemies
             _activeBoss = null;
             hasActiveBoss = false;
 
+#if UNITY_EDITOR
             Debug.Log($"[BossSpawner] DA HA GUC BOSS: {defeated.Data.EnemyName}!");
+#endif
             OnBossDefeated?.Invoke(defeated);
         }
 
@@ -222,7 +226,9 @@ namespace SurvivorGame.Enemies
             }
 
             SpawnBoss();
+#if UNITY_EDITOR
             Debug.Log("[BossSpawner] Da kich hoat bai test can bang Boss (toan bo vu khi Cap 4).");
+#endif
         }
     }
 }

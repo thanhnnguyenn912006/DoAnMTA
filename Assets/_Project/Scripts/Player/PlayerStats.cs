@@ -83,7 +83,9 @@ namespace SurvivorGame.Player
                     break;
             }
 
+#if UNITY_EDITOR
             Debug.Log($"[PlayerStats] Nâng cấp '{data.UpgradeName}' lên cấp {newLevel}/{data.MaxLevel}");
+#endif
             return true;
         }
 

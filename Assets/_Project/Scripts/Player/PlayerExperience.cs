@@ -59,7 +59,9 @@ namespace SurvivorGame.Player
                 currentLevel++;
                 expToNextLevel = CalculateExpRequired(currentLevel);
 
+#if UNITY_EDITOR
                 Debug.Log($"[PlayerExperience] LÊN CẤP {currentLevel}! (Cần {expToNextLevel} EXP cho cấp tiếp theo)");
+#endif
                 OnLevelUp?.Invoke(currentLevel);
             }
 
