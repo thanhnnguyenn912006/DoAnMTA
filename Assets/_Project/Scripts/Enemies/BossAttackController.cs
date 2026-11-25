@@ -58,6 +58,9 @@ namespace SurvivorGame.Enemies
         private float _dashTimer;
         private float _burstAngleOffset;
         private Vector2 _dashDirection;
+        private int _currentProjectileDamage;
+
+        public int CurrentProjectileDamage => _currentProjectileDamage;
 
         private bool IsEnraged =>
             _health != null &&
@@ -71,6 +74,7 @@ namespace SurvivorGame.Enemies
             _movement = GetComponent<EnemyChaseMovement>();
             _enemyController = GetComponent<EnemyController>();
             _health = GetComponent<Health>();
+            _currentProjectileDamage = Mathf.Max(1, projectileDamage);
 
             GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
             if (playerObj != null)
@@ -81,11 +85,20 @@ namespace SurvivorGame.Enemies
 
         private void OnEnable()
         {
+            _currentProjectileDamage = Mathf.Max(1, projectileDamage);
             _state = BossState.Chasing;
             _burstTimer = 1.8f;
             _dashTimer = 3.5f;
             _burstAngleOffset = 0f;
             _movement.SetCanMove(true);
+        }
+
+        /// <summary>
+        /// Áp dụng hệ số sát thương theo độ khó / đợt Boss từ EnemyController.
+        /// </summary>
+        public void SetDamageMultiplier(float damageMultiplier)
+        {
+            _currentProjectileDamage = Mathf.Max(1, Mathf.RoundToInt(projectileDamage * Mathf.Max(0f, damageMultiplier)));
         }
 
         private void Update()
@@ -228,12 +241,12 @@ namespace SurvivorGame.Enemies
                 if (_projectilePool != null)
                 {
                     EnemyProjectile proj = _projectilePool.Get(transform.position, Quaternion.identity);
-                    proj.Initialize(dir, projectileSpeed, projectileDamage, projectileLifetime, _projectilePool.ReleaseCallback);
+                    proj.Initialize(dir, projectileSpeed, _currentProjectileDamage, projectileLifetime, _projectilePool.ReleaseCallback);
                 }
                 else
                 {
                     EnemyProjectile proj = Instantiate(projectilePrefab, transform.position, Quaternion.identity);
-                    proj.Initialize(dir, projectileSpeed, projectileDamage, projectileLifetime, null);
+                    proj.Initialize(dir, projectileSpeed, _currentProjectileDamage, projectileLifetime, null);
                 }
             }
 

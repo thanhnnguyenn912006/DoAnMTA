@@ -22,6 +22,8 @@ namespace SurvivorGame.Enemies
         private Health _health;
         private EnemyChaseMovement _movement;
         private ContactDamage _contactDamage;
+        private RangedEnemyAttack _rangedAttack;
+        private BossAttackController _bossAttack;
         private DamageFlash _damageFlash;
         private SpriteFrameAnimator _frameAnimator;
         private SpriteRenderer _spriteRenderer;
@@ -43,6 +45,8 @@ namespace SurvivorGame.Enemies
             _health = GetComponent<Health>();
             _movement = GetComponent<EnemyChaseMovement>();
             _contactDamage = GetComponent<ContactDamage>();
+            TryGetComponent(out _rangedAttack);
+            TryGetComponent(out _bossAttack);
             TryGetComponent(out _damageFlash);
             TryGetComponent(out _frameAnimator);
             _spriteRenderer = GetComponent<SpriteRenderer>();
@@ -116,6 +120,17 @@ namespace SurvivorGame.Enemies
 
             _health.Initialize(finalHp, 0f);
             _contactDamage.SetDamage(finalDamage);
+
+            if (_rangedAttack != null)
+            {
+                _rangedAttack.SetDamageMultiplier(damageMultiplier);
+            }
+
+            if (_bossAttack != null)
+            {
+                _bossAttack.SetDamageMultiplier(damageMultiplier);
+            }
+
             _movement.SetMoveSpeed(finalSpeed);
             _movement.SetTarget(target);
             _movement.SetCanMove(true);

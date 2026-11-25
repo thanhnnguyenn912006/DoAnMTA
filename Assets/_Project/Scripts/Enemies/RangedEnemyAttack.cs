@@ -30,11 +30,15 @@ namespace SurvivorGame.Enemies
         private Transform _target;
         private ComponentPool<EnemyProjectile> _projectilePool;
         private float _fireTimer;
+        private int _currentProjectileDamage;
+
+        public int CurrentProjectileDamage => _currentProjectileDamage;
 
         private void Awake()
         {
             _movement = GetComponent<EnemyChaseMovement>();
             _health = GetComponent<Health>();
+            _currentProjectileDamage = Mathf.Max(1, projectileDamage);
 
             GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
             if (playerObj != null)
@@ -45,8 +49,17 @@ namespace SurvivorGame.Enemies
 
         private void OnEnable()
         {
-            // Tạo độ lệch ngẫu nhiên cho phát bắn đầu tiên khi ra khỏi Pool
+            // Khôi phục sát thương gốc và tạo độ lệch ngẫu nhiên cho phát bắn đầu tiên khi ra khỏi Pool
+            _currentProjectileDamage = Mathf.Max(1, projectileDamage);
             _fireTimer = Random.Range(0.7f, fireCooldown);
+        }
+
+        /// <summary>
+        /// Áp dụng hệ số sát thương theo độ khó thời gian từ EnemyController.
+        /// </summary>
+        public void SetDamageMultiplier(float damageMultiplier)
+        {
+            _currentProjectileDamage = Mathf.Max(1, Mathf.RoundToInt(projectileDamage * Mathf.Max(0f, damageMultiplier)));
         }
 
         private void Update()
@@ -84,12 +97,12 @@ namespace SurvivorGame.Enemies
             if (_projectilePool != null)
             {
                 EnemyProjectile proj = _projectilePool.Get(transform.position, Quaternion.identity);
-                proj.Initialize(direction, projectileSpeed, projectileDamage, projectileLifetime, _projectilePool.ReleaseCallback);
+                proj.Initialize(direction, projectileSpeed, _currentProjectileDamage, projectileLifetime, _projectilePool.ReleaseCallback);
             }
             else
             {
                 EnemyProjectile proj = Instantiate(projectilePrefab, transform.position, Quaternion.identity);
-                proj.Initialize(direction, projectileSpeed, projectileDamage, projectileLifetime, null);
+                proj.Initialize(direction, projectileSpeed, _currentProjectileDamage, projectileLifetime, null);
             }
         }
 
