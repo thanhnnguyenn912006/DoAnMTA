@@ -212,10 +212,10 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'NHAC NEN: 45%'
+  m_text: "NH\u1EA0C N\u1EC0N: 45%"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 81ae04ba477de63489515395a58cfe53, type: 2}
+  m_sharedMaterial: {fileID: -7077954027361140263, guid: 81ae04ba477de63489515395a58cfe53, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -671,8 +671,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: 'KY LUC: 0 DIEM | LAU NHAT: 00:00'
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 81ae04ba477de63489515395a58cfe53, type: 2}
+  m_sharedMaterial: {fileID: -7077954027361140263, guid: 81ae04ba477de63489515395a58cfe53, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1000,10 +1000,10 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: THOAT
+  m_text: "THO\xC1T"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 81ae04ba477de63489515395a58cfe53, type: 2}
+  m_sharedMaterial: {fileID: -7077954027361140263, guid: 81ae04ba477de63489515395a58cfe53, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1599,8 +1599,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: SURVIVOR ARENA
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 81ae04ba477de63489515395a58cfe53, type: 2}
+  m_sharedMaterial: {fileID: -7077954027361140263, guid: 81ae04ba477de63489515395a58cfe53, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1734,10 +1734,10 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: BAT DAU CHOI
+  m_text: "B\u1EAET \u0110\u1EA6U CH\u01A0I"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 81ae04ba477de63489515395a58cfe53, type: 2}
+  m_sharedMaterial: {fileID: -7077954027361140263, guid: 81ae04ba477de63489515395a58cfe53, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -1871,10 +1871,10 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'HIEU UNG: 80%'
+  m_text: "HI\u1EC6U \u1EE8NG: 80%"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: 81ae04ba477de63489515395a58cfe53, type: 2}
+  m_sharedMaterial: {fileID: -7077954027361140263, guid: 81ae04ba477de63489515395a58cfe53, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
