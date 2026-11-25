@@ -5,7 +5,7 @@ namespace SurvivorGame.Systems
 {
     /// <summary>
     /// Quản lý âm thanh tập trung (Singleton + DontDestroyOnLoad):
-    /// Phát nhạc nền lặp, bộ SFX đa kênh có chống nghẽn tiếng và lưu âm lượng qua PlayerPrefs.
+    /// Phát nhạc nền lặp, tách kênh SFX giao diện/trạng thái cố định cao độ và bộ kênh chiến đấu chống nghẽn tiếng.
     /// </summary>
     public class AudioManager : MonoBehaviour
     {
@@ -36,6 +36,7 @@ namespace SurvivorGame.Systems
         private readonly Dictionary<SoundId, float> _lastPlayedTimes = new Dictionary<SoundId, float>();
 
         private AudioSource _bgmSource;
+        private AudioSource _uiSfxSource;
         private AudioSource[] _sfxSources;
         private int _nextSfxChannel;
 
@@ -68,6 +69,13 @@ namespace SurvivorGame.Systems
             _bgmSource.playOnAwake = false;
             _bgmSource.volume = BgmVolume;
 
+            // Kênh riêng cố định pitch = 1 cho các âm báo UI & trạng thái quan trọng
+            _uiSfxSource = gameObject.AddComponent<AudioSource>();
+            _uiSfxSource.loop = false;
+            _uiSfxSource.playOnAwake = false;
+            _uiSfxSource.pitch = 1f;
+
+            // Các kênh xoay vòng cho SFX chiến đấu có biến thiên cao độ
             _sfxSources = new AudioSource[sfxChannelCount];
             for (int i = 0; i < sfxChannelCount; i++)
             {
@@ -110,6 +118,7 @@ namespace SurvivorGame.Systems
 
         /// <summary>
         /// Phát một hiệu ứng âm thanh với tùy chọn giới hạn tần suất (chống nghẽn tiếng) và biến thiên cao độ nhẹ.
+        /// Các âm báo UI/trạng thái luôn phát trên kênh riêng cố định pitch = 1 để không bị méo tiếng.
         /// </summary>
         public void PlaySfx(
             SoundId id,
@@ -129,16 +138,42 @@ namespace SurvivorGame.Systems
             }
             _lastPlayedTimes[id] = now;
 
+            float finalVolume = Mathf.Clamp01(SfxVolume * volumeScale);
+
+            if (IsUiOrStateCue(id) && _uiSfxSource != null)
+            {
+                _uiSfxSource.pitch = 1f;
+                _uiSfxSource.PlayOneShot(clip, finalVolume);
+                return;
+            }
+
             AudioSource channel = _sfxSources[_nextSfxChannel];
             _nextSfxChannel = (_nextSfxChannel + 1) % _sfxSources.Length;
 
             channel.pitch = pitchJitter > 0f ? 1f + UnityEngine.Random.Range(-pitchJitter, pitchJitter) : 1f;
-            channel.PlayOneShot(clip, Mathf.Clamp01(SfxVolume * volumeScale));
+            channel.PlayOneShot(clip, finalVolume);
+        }
+
+        private static bool IsUiOrStateCue(SoundId id)
+        {
+            switch (id)
+            {
+                case SoundId.LevelUp:
+                case SoundId.UpgradeSelect:
+                case SoundId.BossSpawn:
+                case SoundId.BossDefeat:
+                case SoundId.Victory:
+                case SoundId.GameOver:
+                case SoundId.ButtonClick:
+                    return true;
+                default:
+                    return false;
+            }
         }
 
         public void PlayButtonClick()
         {
-            PlaySfx(SoundId.ButtonClick, 0.85f, 0.04f, 0.04f);
+            PlaySfx(SoundId.ButtonClick, 0.85f, 0.04f, 0f);
         }
 
         public void SetBgmVolume(float value)

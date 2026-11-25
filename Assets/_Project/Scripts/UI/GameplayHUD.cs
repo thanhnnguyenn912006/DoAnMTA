@@ -6,8 +6,7 @@ using SurvivorGame.Systems;
 namespace SurvivorGame.UI
 {
     /// <summary>
-    /// Hiển thị thông số trực tiếp trong trận: Thanh máu Player, Đồng hồ sinh tồn, Điểm số và Số quái đã hạ.
-    /// Lưu đệm giá trị cũ để hạn chế tối đa cấp phát chuỗi rác (GC Alloc) mỗi khung hình.
+    /// Hiển thị thông số trực tiếp trong trận: Thanh máu Player (lắng nghe sự kiện), Đồng hồ sinh tồn, Điểm số và Số quái đã hạ.
     /// </summary>
     public class GameplayHUD : MonoBehaviour
     {
@@ -51,6 +50,11 @@ namespace SurvivorGame.UI
             {
                 gameManager.OnScoreAndKillsChanged += HandleScoreAndKillsChanged;
             }
+
+            if (playerHealth != null)
+            {
+                playerHealth.OnHealthChanged += HandleHealthChanged;
+            }
         }
 
         private void OnDisable()
@@ -58,6 +62,11 @@ namespace SurvivorGame.UI
             if (gameManager != null)
             {
                 gameManager.OnScoreAndKillsChanged -= HandleScoreAndKillsChanged;
+            }
+
+            if (playerHealth != null)
+            {
+                playerHealth.OnHealthChanged -= HandleHealthChanged;
             }
         }
 
@@ -69,41 +78,40 @@ namespace SurvivorGame.UI
                 UpdateTimerDisplay(gameManager.SurvivalTime);
             }
 
-            UpdateHealthDisplay();
+            if (playerHealth != null)
+            {
+                HandleHealthChanged(playerHealth.CurrentHealth, playerHealth.MaxHealth);
+            }
         }
 
         private void Update()
         {
-            UpdateHealthDisplay();
-
             if (gameManager != null)
             {
                 UpdateTimerDisplay(gameManager.SurvivalTime);
             }
         }
 
-        private void UpdateHealthDisplay()
+        private void HandleHealthChanged(int currentHp, int maxHp)
         {
-            if (playerHealth == null) return;
+            int safeHp = Mathf.Max(0, currentHp);
+            int safeMaxHp = Mathf.Max(1, maxHp);
 
-            int currentHp = Mathf.Max(0, playerHealth.CurrentHealth);
-            int maxHp = Mathf.Max(1, playerHealth.MaxHealth);
+            if (safeHp == _lastHp && safeMaxHp == _lastMaxHp) return;
 
-            if (currentHp == _lastHp && maxHp == _lastMaxHp) return;
-
-            _lastHp = currentHp;
-            _lastMaxHp = maxHp;
+            _lastHp = safeHp;
+            _lastMaxHp = safeMaxHp;
 
             if (playerHealthSlider != null)
             {
                 playerHealthSlider.minValue = 0f;
                 playerHealthSlider.maxValue = 1f;
-                playerHealthSlider.value = (float)currentHp / maxHp;
+                playerHealthSlider.value = (float)safeHp / safeMaxHp;
             }
 
             if (playerHealthText != null)
             {
-                playerHealthText.text = $"HP {currentHp} / {maxHp}";
+                playerHealthText.text = $"HP {safeHp} / {safeMaxHp}";
             }
         }
 
