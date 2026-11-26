@@ -21,10 +21,10 @@ namespace SurvivorGame.Systems
         [SerializeField] private SpecialPickup specialPickupPrefab;
         [SerializeField] private Sprite healPotionSprite;
         [SerializeField] private Sprite mapMagnetSprite;
-        [SerializeField, Min(0)] private int pickupPrewarmCount = 6;
-        [SerializeField, Min(1)] private int maxActivePickups = 5;
+        [SerializeField, Min(0)] private int pickupPrewarmCount = 8;
+        [SerializeField, Min(1)] private int maxActivePickups = 6;
         [SerializeField, Range(0f, 1f)] private float mapMagnetDropChance = 0.008f;
-        [SerializeField, Range(0f, 1f)] private float healDropChance = 0.018f;
+        [SerializeField, Range(0f, 1f)] private float healDropChance = 0.038f;
         [SerializeField, Min(1)] private int healAmount = 25;
         [SerializeField, Min(0f)] private float pickupScatterRadius = 0.35f;
 

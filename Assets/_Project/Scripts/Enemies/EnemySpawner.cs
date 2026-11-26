@@ -27,7 +27,7 @@ namespace SurvivorGame.Enemies
 
         [Header("Quái Tinh Anh (Elite - rơi Rương Báu)")]
         [SerializeField] private EnemyData eliteEnemyData;
-        [SerializeField] private float[] eliteSpawnTimes = { 50f, 100f };
+        [SerializeField] private float[] eliteSpawnTimes = { 70f, 140f, 195f };
 
         [Header("Trạng thái (chỉ đọc để theo dõi trong Inspector)")]
         [SerializeField] private float elapsedTime;

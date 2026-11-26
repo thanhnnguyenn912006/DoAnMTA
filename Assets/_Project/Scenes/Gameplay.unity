@@ -8646,8 +8646,9 @@ MonoBehaviour:
   relocateCheckInterval: 0.5
   eliteEnemyData: {fileID: 11400000, guid: 2dd1bbb84ba420940ab01c8bd37112f8, type: 2}
   eliteSpawnTimes:
-  - 50
-  - 100
+  - 70
+  - 140
+  - 195
   elapsedTime: 0
   activeEnemyCount: 0
   isSpawning: 1
@@ -8897,9 +8898,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bac3e69a385c12743a00d5cbe9f230b7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SurvivorGame.Player.PlayerExperience
-  baseExpToLevel: 30
-  expFlatIncreasePerLevel: 15
-  expMultiplierPerLevel: 1.15
+  baseExpToLevel: 20
+  expFlatIncreasePerLevel: 16
+  expMultiplierPerLevel: 1.03
   magnetRadius: 2.5
   collectRadius: 0.45
   currentLevel: 1
@@ -9257,7 +9258,7 @@ MonoBehaviour:
   enemySpawner: {fileID: 1739994254}
   bossData: {fileID: 11400000, guid: 47b0b5ebeffdd8c48b6fea9f06a0454c, type: 2}
   bossPrefab: {fileID: 5915802894080137474, guid: cdd6b6ff4dff7264489b5b946b352ea3, type: 3}
-  firstBossTime: 150
+  firstBossTime: 240
   bossWarningLeadTime: 10
   enableEndlessRepeat: 0
   repeatInterval: 120
@@ -9317,10 +9318,10 @@ MonoBehaviour:
   specialPickupPrefab: {fileID: 1401254160254495909, guid: 0fc5977d32f752246b287d8259bec36b, type: 3}
   healPotionSprite: {fileID: 21300000, guid: 2178bd8b1b235d048a016a7b660355a5, type: 3}
   mapMagnetSprite: {fileID: 21300000, guid: 9dbe6607b83bdc3499af756d357eaf4c, type: 3}
-  pickupPrewarmCount: 6
-  maxActivePickups: 5
+  pickupPrewarmCount: 8
+  maxActivePickups: 6
   mapMagnetDropChance: 0.008
-  healDropChance: 0.018
+  healDropChance: 0.038
   healAmount: 25
   pickupScatterRadius: 0.35
   treasureChestPrefab: {fileID: 4699885947832952019, guid: 282f17fc027b7be49acaec039c230dc9, type: 3}

@@ -9,9 +9,9 @@ namespace SurvivorGame.Player
     public class PlayerExperience : MonoBehaviour
     {
         [Header("Công thức kinh nghiệm")]
-        [SerializeField, Min(1)] private int baseExpToLevel = 30;
-        [SerializeField, Min(1)] private int expFlatIncreasePerLevel = 15;
-        [SerializeField, Min(1f)] private float expMultiplierPerLevel = 1.15f;
+        [SerializeField, Min(1)] private int baseExpToLevel = 20;
+        [SerializeField, Min(1)] private int expFlatIncreasePerLevel = 16;
+        [SerializeField, Min(1f)] private float expMultiplierPerLevel = 1.03f;
 
         [Header("Cấu hình hút ngọc (Magnet)")]
         [SerializeField, Min(0.5f)] private float magnetRadius = 2.5f;

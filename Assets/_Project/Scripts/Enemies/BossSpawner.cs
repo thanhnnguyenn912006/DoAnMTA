@@ -18,7 +18,7 @@ namespace SurvivorGame.Enemies
         [SerializeField] private EnemyController bossPrefab;
 
         [Header("Lịch xuất hiện Boss")]
-        [SerializeField, Min(5f)] private float firstBossTime = 150f;
+        [SerializeField, Min(5f)] private float firstBossTime = 240f;
         [SerializeField, Min(0f)] private float bossWarningLeadTime = 10f;
 
         [Header("Chế độ Vô tận (mặc định tắt vì hạ Boss đợt 1 là Chiến thắng)")]

@@ -121,14 +121,19 @@ namespace SurvivorGame.EditorTools
                     SetSpawnerElapsedTime(enemySpawner, enemySpawner.ElapsedTime + 25f);
                 }
 
-                if (GUILayout.Button("Nhảy tới 48s (Sắp ra Quái Tinh Anh 1)"))
+                if (GUILayout.Button("Nhảy tới 68s (Sắp ra Quái Tinh Anh 1)"))
                 {
-                    SetSpawnerElapsedTime(enemySpawner, 48f);
+                    SetSpawnerElapsedTime(enemySpawner, 68f);
                 }
 
-                if (GUILayout.Button("Nhảy tới 138s (Sắp cảnh báo Boss)"))
+                if (GUILayout.Button("Nhảy tới 163s (Giai đoạn 4 - Bão quái)"))
                 {
-                    SetSpawnerElapsedTime(enemySpawner, 138f);
+                    SetSpawnerElapsedTime(enemySpawner, 163f);
+                }
+
+                if (GUILayout.Button("Nhảy tới 228s (Sắp cảnh báo Boss 4:00)"))
+                {
+                    SetSpawnerElapsedTime(enemySpawner, 228f);
                 }
             }
 

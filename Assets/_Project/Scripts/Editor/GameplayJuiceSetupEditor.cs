@@ -931,11 +931,31 @@ namespace SurvivorGame.EditorTools
                 SerializedObject so = new SerializedObject(enemySpawner);
                 so.FindProperty("eliteEnemyData").objectReferenceValue = eliteEnemyData;
                 SerializedProperty timesProp = so.FindProperty("eliteSpawnTimes");
-                timesProp.arraySize = 2;
-                timesProp.GetArrayElementAtIndex(0).floatValue = 50f;
-                timesProp.GetArrayElementAtIndex(1).floatValue = 100f;
+                timesProp.arraySize = 3;
+                timesProp.GetArrayElementAtIndex(0).floatValue = 70f;
+                timesProp.GetArrayElementAtIndex(1).floatValue = 140f;
+                timesProp.GetArrayElementAtIndex(2).floatValue = 195f;
                 so.ApplyModifiedPropertiesWithoutUndo();
                 EditorUtility.SetDirty(enemySpawner);
+            }
+
+            if (bossSpawner != null)
+            {
+                SerializedObject so = new SerializedObject(bossSpawner);
+                so.FindProperty("firstBossTime").floatValue = 240f;
+                so.ApplyModifiedPropertiesWithoutUndo();
+                EditorUtility.SetDirty(bossSpawner);
+            }
+
+            PlayerExperience playerExperience = Object.FindAnyObjectByType<PlayerExperience>();
+            if (playerExperience != null)
+            {
+                SerializedObject so = new SerializedObject(playerExperience);
+                so.FindProperty("baseExpToLevel").intValue = 20;
+                so.FindProperty("expFlatIncreasePerLevel").intValue = 16;
+                so.FindProperty("expMultiplierPerLevel").floatValue = 1.03f;
+                so.ApplyModifiedPropertiesWithoutUndo();
+                EditorUtility.SetDirty(playerExperience);
             }
 
             WeaponBarHUD weaponBar = Object.FindAnyObjectByType<WeaponBarHUD>();
@@ -964,6 +984,9 @@ namespace SurvivorGame.EditorTools
                 so.FindProperty("specialPickupPrefab").objectReferenceValue = pickupPrefab;
                 so.FindProperty("healPotionSprite").objectReferenceValue = healSprite;
                 so.FindProperty("mapMagnetSprite").objectReferenceValue = magnetSprite;
+                so.FindProperty("pickupPrewarmCount").intValue = 8;
+                so.FindProperty("maxActivePickups").intValue = 6;
+                so.FindProperty("healDropChance").floatValue = 0.038f;
                 so.FindProperty("treasureChestPrefab").objectReferenceValue = chestPrefab;
                 so.ApplyModifiedPropertiesWithoutUndo();
                 EditorUtility.SetDirty(dropManager);
