@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using TMPro;
 using UnityEditor;
+using UnityEditor.Build;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -32,6 +33,7 @@ namespace SurvivorGame.EditorTools
         private const string MagnetSpritePath = EffectsFolder + "/Pickup_Magnet.png";
         private const string ChestSpritePath = EffectsFolder + "/Pickup_Chest.png";
         private const string BossArrowSpritePath = UiArtFolder + "/UI_BossArrow.png";
+        private const string LowHpVignetteSpritePath = UiArtFolder + "/UI_LowHpVignette.png";
 
         private const string AutoGunEvoVfxPath = ProjectilesFolder + "/Projectile_AutoGun_Evo.png";
         private const string OrbitEvoVfxPath = EffectsFolder + "/Orb_Sawblade_Evo.png";
@@ -70,7 +72,7 @@ namespace SurvivorGame.EditorTools
         private const string GameplayScenePath = "Assets/_Project/Scenes/Gameplay.unity";
 
         private const string ControlsHintContent =
-            "WASD / Mũi tên: Di chuyển  |  Space / Shift: Lướt  |  1/2/3: Chọn thẻ  |  ESC: Tạm dừng";
+            "WASD / Mũi tên: Di chuyển  |  Space / Shift: Lướt  |  1/2/3 & R: Chọn / Đổi thẻ  |  ESC: Tạm dừng";
 
         private static readonly Color PanelBackdropColor = Hex("#141923", 0.88f);
         private static readonly Color CardNormalColor = Hex("#1E293B", 1f);
@@ -146,6 +148,7 @@ namespace SurvivorGame.EditorTools
             // (Tự nạp lại Asset/Prefab SAU EditorSceneManager.OpenScene để không bị UnloadUnusedAssets xóa tham chiếu)
             WireGameplayScene();
             WireMainMenuScene();
+            ConfigureStandalonePlayerSettings();
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
@@ -261,11 +264,52 @@ namespace SurvivorGame.EditorTools
             // 4. Mũi tên chỉ hướng Boss 32x32 (hướng phải +X để Atan2 xoay trực tiếp)
             GenerateBossArrowSprite(BossArrowSpritePath, 32);
 
+            // 5. Lớp phủ viền đỏ cảnh báo máu thấp 128x128 (giữa trong suốt, rìa đỏ mượt)
+            GenerateLowHpVignetteSprite(LowHpVignetteSpritePath, 128);
+
             AssetDatabase.Refresh();
             ConfigurePixelSprite(HealSpritePath, 20f);
             ConfigurePixelSprite(MagnetSpritePath, 20f);
             ConfigurePixelSprite(ChestSpritePath, 20f);
             ConfigureUiSprite(BossArrowSpritePath, 32f);
+            ConfigureUiSprite(LowHpVignetteSpritePath, 128f);
+        }
+
+        private static void GenerateLowHpVignetteSprite(string assetPath, int size)
+        {
+            Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+            float half = (size - 1) * 0.5f;
+
+            for (int y = 0; y < size; y++)
+            {
+                for (int x = 0; x < size; x++)
+                {
+                    float nx = (x - half) / half;
+                    float ny = (y - half) / half;
+                    float radial = Mathf.Sqrt(nx * nx + ny * ny);
+                    float edgeBox = Mathf.Max(Mathf.Abs(nx), Mathf.Abs(ny));
+                    float borderFactor = Mathf.Max(
+                        Mathf.InverseLerp(0.62f, 1.32f, radial),
+                        Mathf.InverseLerp(0.74f, 1.0f, edgeBox));
+                    float alpha = Mathf.Pow(Mathf.Clamp01(borderFactor), 1.65f) * 0.88f;
+                    tex.SetPixel(x, y, new Color(0.86f, 0.08f, 0.10f, alpha));
+                }
+            }
+
+            tex.Apply();
+            File.WriteAllBytes(assetPath, tex.EncodeToPNG());
+            Object.DestroyImmediate(tex);
+        }
+
+        private static void ConfigureStandalonePlayerSettings()
+        {
+            PlayerSettings.resizableWindow = true;
+
+            Texture2D appIcon = AssetDatabase.LoadAssetAtPath<Texture2D>(AutoGunEvoIconPath);
+            if (appIcon != null)
+            {
+                PlayerSettings.SetIcons(NamedBuildTarget.Unknown, new[] { appIcon }, IconKind.Any);
+            }
         }
 
         private static void GenerateBossArrowSprite(string assetPath, int size)
@@ -879,6 +923,7 @@ namespace SurvivorGame.EditorTools
             Sprite healSprite = AssetDatabase.LoadAssetAtPath<Sprite>(HealSpritePath);
             Sprite magnetSprite = AssetDatabase.LoadAssetAtPath<Sprite>(MagnetSpritePath);
             Sprite bossArrowSprite = AssetDatabase.LoadAssetAtPath<Sprite>(BossArrowSpritePath);
+            Sprite lowHpVignetteSprite = AssetDatabase.LoadAssetAtPath<Sprite>(LowHpVignetteSpritePath);
             Sprite boxSprite = AssetDatabase.LoadAssetAtPath<Sprite>(BoxSpritePath);
             Sprite fillSprite = AssetDatabase.LoadAssetAtPath<Sprite>(FillSpritePath);
             TMP_FontAsset baseFont = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(FontAssetPath);
@@ -893,6 +938,7 @@ namespace SurvivorGame.EditorTools
                 SerializedObject so = new SerializedObject(upgradeManager);
                 SetObjectArray(so.FindProperty("availablePassives"), allPassives);
                 if (gameManager != null) so.FindProperty("gameManager").objectReferenceValue = gameManager;
+                so.FindProperty("rerollsPerRun").intValue = 3;
                 weaponsContainer = so.FindProperty("weaponsContainer").objectReferenceValue as Transform;
                 so.ApplyModifiedPropertiesWithoutUndo();
                 EditorUtility.SetDirty(upgradeManager);
@@ -1010,6 +1056,7 @@ namespace SurvivorGame.EditorTools
             GameplayHUD hud = Object.FindAnyObjectByType<GameplayHUD>();
             if (hud != null)
             {
+                Image lowHpVignette = EnsureLowHpVignetteOverlay(hud.transform, lowHpVignetteSprite);
                 (Slider dashSlider, TMP_Text dashText) = EnsureDashCooldownBar(hud.transform, boxSprite, fillSprite, baseFont, hudMat);
                 TMP_Text bannerText = EnsureAnnouncementBanner(hud.transform, baseFont, hudMat);
                 RectTransform bossArrow = EnsureBossOffscreenIndicator(hud.transform, bossArrowSprite);
@@ -1022,6 +1069,7 @@ namespace SurvivorGame.EditorTools
                 so.FindProperty("dashStatusText").objectReferenceValue = dashText;
                 so.FindProperty("announcementBannerText").objectReferenceValue = bannerText;
                 so.FindProperty("bossOffscreenIndicator").objectReferenceValue = bossArrow;
+                so.FindProperty("lowHpVignetteImage").objectReferenceValue = lowHpVignette;
                 so.FindProperty("mainCamera").objectReferenceValue = Camera.main;
                 so.ApplyModifiedPropertiesWithoutUndo();
                 EditorUtility.SetDirty(hud);
@@ -1030,12 +1078,107 @@ namespace SurvivorGame.EditorTools
             Canvas canvas = Object.FindAnyObjectByType<Canvas>();
             if (canvas != null)
             {
+                EnsureUpgradeRerollButton(canvas, boxSprite, baseFont);
                 EnsureChestRewardPanel(canvas, upgradeManager, gameManager, boxSprite, baseFont, hudMat);
                 ConfigureEndGamePanelForBreakdown(canvas.transform, weaponsContainer);
             }
 
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);
+        }
+
+        private static Image EnsureLowHpVignetteOverlay(Transform hudRoot, Sprite vignetteSprite)
+        {
+            GameObject vignetteObj = GetOrCreateChild(
+                hudRoot,
+                "LowHpVignetteOverlay",
+                typeof(RectTransform),
+                typeof(CanvasRenderer),
+                typeof(Image));
+
+            vignetteObj.transform.SetAsFirstSibling();
+
+            RectTransform rect = vignetteObj.GetComponent<RectTransform>();
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.anchoredPosition = Vector2.zero;
+            rect.sizeDelta = Vector2.zero;
+
+            Image img = vignetteObj.GetComponent<Image>();
+            if (vignetteSprite != null) img.sprite = vignetteSprite;
+            img.color = new Color(1f, 1f, 1f, 0.45f);
+            img.raycastTarget = false;
+
+            vignetteObj.SetActive(false);
+            return img;
+        }
+
+        private static void EnsureUpgradeRerollButton(Canvas canvas, Sprite boxSprite, TMP_FontAsset baseFont)
+        {
+            Transform upgradePanel = canvas.transform.Find("UpgradePanel");
+            if (upgradePanel == null) return;
+
+            GameObject btnObj = GetOrCreateChild(
+                upgradePanel,
+                "RerollButton",
+                typeof(RectTransform),
+                typeof(CanvasRenderer),
+                typeof(Image),
+                typeof(Button));
+
+            RectTransform rect = btnObj.GetComponent<RectTransform>();
+            rect.anchorMin = new Vector2(0.5f, 0.5f);
+            rect.anchorMax = new Vector2(0.5f, 0.5f);
+            rect.pivot = new Vector2(0.5f, 0.5f);
+            rect.anchoredPosition = new Vector2(0f, -305f);
+            rect.sizeDelta = new Vector2(320f, 56f);
+
+            Image img = btnObj.GetComponent<Image>();
+            if (boxSprite != null)
+            {
+                img.sprite = boxSprite;
+                img.type = Image.Type.Sliced;
+            }
+            img.color = Color.white;
+            img.raycastTarget = true;
+
+            Button btn = btnObj.GetComponent<Button>();
+            btn.transition = Selectable.Transition.ColorTint;
+            ColorBlock cb = btn.colors;
+            cb.normalColor = Hex("#334155", 1f);
+            cb.highlightedColor = Hex("#475569", 1f);
+            cb.selectedColor = Hex("#475569", 1f);
+            cb.pressedColor = Hex("#1E293B", 1f);
+            cb.disabledColor = Hex("#1E293B", 0.45f);
+            cb.fadeDuration = 0.08f;
+            btn.colors = cb;
+
+            TMP_Text label = EnsurePanelText(
+                btnObj.transform,
+                "Text (TMP)",
+                Vector2.zero,
+                Vector2.zero,
+                22f,
+                FontStyles.Bold,
+                TextGold,
+                baseFont,
+                baseFont != null ? baseFont.material : null);
+            RectTransform labelRect = label.GetComponent<RectTransform>();
+            labelRect.anchorMin = Vector2.zero;
+            labelRect.anchorMax = Vector2.one;
+            labelRect.anchoredPosition = Vector2.zero;
+            labelRect.sizeDelta = Vector2.zero;
+            label.text = "ĐỔI THẺ [R] (3)";
+
+            UpgradePanelUI panelUi = Object.FindAnyObjectByType<UpgradePanelUI>();
+            if (panelUi != null)
+            {
+                SerializedObject uiSo = new SerializedObject(panelUi);
+                uiSo.FindProperty("rerollButton").objectReferenceValue = btn;
+                uiSo.FindProperty("rerollButtonText").objectReferenceValue = label;
+                uiSo.ApplyModifiedPropertiesWithoutUndo();
+                EditorUtility.SetDirty(panelUi);
+            }
         }
 
         private static RectTransform EnsureBossOffscreenIndicator(Transform hudRoot, Sprite arrowSprite)

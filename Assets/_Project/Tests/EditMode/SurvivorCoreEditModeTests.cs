@@ -1,6 +1,7 @@
 using System.Reflection;
 using NUnit.Framework;
 using SurvivorGame.Data;
+using SurvivorGame.Enemies;
 using SurvivorGame.Player;
 using SurvivorGame.Systems;
 using SurvivorGame.Weapons;
@@ -763,6 +764,125 @@ namespace SurvivorGame.Tests.EditMode
                 Object.DestroyImmediate(evoSprite);
                 Object.DestroyImmediate(baseSprite);
                 Object.DestroyImmediate(tex);
+            }
+        }
+
+        [Test]
+        public void UpgradeManager_TryRerollChoices_DecrementsCountAndStopsAtZero()
+        {
+            GameObject playerObj = new GameObject("RerollPlayerTest");
+            GameObject mgrObj = new GameObject("RerollMgrTest");
+            PassiveUpgradeData[] passives = new PassiveUpgradeData[5];
+            try
+            {
+                for (int i = 0; i < passives.Length; i++)
+                {
+                    passives[i] = ScriptableObject.CreateInstance<PassiveUpgradeData>();
+                    SerializedObject pSo = new SerializedObject(passives[i]);
+                    pSo.FindProperty("upgradeId").stringValue = $"p_{i}";
+                    pSo.FindProperty("upgradeName").stringValue = $"Bị động {i}";
+                    pSo.FindProperty("upgradeType").enumValueIndex = i % 5;
+                    pSo.FindProperty("maxLevel").intValue = 3;
+                    pSo.FindProperty("valuePerLevel").floatValue = 0.1f;
+                    pSo.ApplyModifiedPropertiesWithoutUndo();
+                }
+
+                Health health = playerObj.AddComponent<Health>();
+                PlayerExperience exp = playerObj.AddComponent<PlayerExperience>();
+                PlayerStats stats = playerObj.AddComponent<PlayerStats>();
+                InvokeLifecycle(health, "Awake");
+                InvokeLifecycle(exp, "Awake");
+                InvokeLifecycle(stats, "Awake");
+
+                UpgradeManager manager = mgrObj.AddComponent<UpgradeManager>();
+                SerializedObject mSo = new SerializedObject(manager);
+                mSo.FindProperty("playerExperience").objectReferenceValue = exp;
+                mSo.FindProperty("playerStats").objectReferenceValue = stats;
+                mSo.FindProperty("weaponsContainer").objectReferenceValue = playerObj.transform;
+                mSo.FindProperty("rerollsPerRun").intValue = 2;
+                SerializedProperty arr = mSo.FindProperty("availablePassives");
+                arr.arraySize = passives.Length;
+                for (int i = 0; i < passives.Length; i++)
+                {
+                    arr.GetArrayElementAtIndex(i).objectReferenceValue = passives[i];
+                }
+                mSo.ApplyModifiedPropertiesWithoutUndo();
+                InvokeLifecycle(manager, "Awake");
+
+                int choicesReadyCount = 0;
+                manager.OnUpgradeChoicesReady += _ => choicesReadyCount++;
+
+                // Chưa mở bảng nâng cấp -> không thể đổi thẻ
+                Assert.AreEqual(2, manager.RemainingRerolls);
+                Assert.IsFalse(manager.TryRerollChoices());
+
+                // Mở bảng nâng cấp -> đổi thành công đúng 2 lượt, lượt 3 bị từ chối
+                InvokeLifecycle(manager, "OpenNextUpgradeChoice");
+                Assert.AreEqual(1, choicesReadyCount);
+                Assert.IsTrue(manager.CanReroll);
+
+                Assert.IsTrue(manager.TryRerollChoices());
+                Assert.AreEqual(1, manager.RemainingRerolls);
+                Assert.AreEqual(2, choicesReadyCount);
+
+                Assert.IsTrue(manager.TryRerollChoices());
+                Assert.AreEqual(0, manager.RemainingRerolls);
+                Assert.AreEqual(3, choicesReadyCount);
+                Assert.IsFalse(manager.CanReroll);
+                Assert.IsFalse(manager.TryRerollChoices());
+            }
+            finally
+            {
+                Object.DestroyImmediate(mgrObj);
+                Object.DestroyImmediate(playerObj);
+                for (int i = 0; i < passives.Length; i++)
+                {
+                    if (passives[i] != null) Object.DestroyImmediate(passives[i]);
+                }
+            }
+        }
+
+        [Test]
+        public void BossAttackController_EnrageThreshold_FiresEnragedEventOnce()
+        {
+            GameObject bossObj = new GameObject("BossEnrageTest");
+            int enragedCount = 0;
+            void HandleEnraged(BossAttackController b)
+            {
+                if (b.gameObject == bossObj) enragedCount++;
+            }
+
+            try
+            {
+                BossAttackController.OnAnyBossEnraged += HandleEnraged;
+                bossObj.AddComponent<Rigidbody2D>();
+                bossObj.AddComponent<CircleCollider2D>();
+                bossObj.AddComponent<SpriteRenderer>();
+                Health health = bossObj.AddComponent<Health>();
+                bossObj.AddComponent<EnemyChaseMovement>();
+                bossObj.AddComponent<EnemyController>();
+                BossAttackController bossAttack = bossObj.AddComponent<BossAttackController>();
+
+                InvokeLifecycle(health, "Awake");
+                health.Initialize(1000, 0f);
+                InvokeLifecycle(bossAttack, "Awake");
+                InvokeLifecycle(bossAttack, "OnEnable");
+
+                // Trên 50% HP -> chưa cuồng nộ
+                health.TakeDamage(400);
+                InvokeLifecycle(bossAttack, "Update");
+                Assert.AreEqual(0, enragedCount);
+
+                // Tụt xuống <= 50% HP -> phát sự kiện cuồng nộ đúng 1 lần duy nhất
+                health.TakeDamage(150);
+                InvokeLifecycle(bossAttack, "Update");
+                InvokeLifecycle(bossAttack, "Update");
+                Assert.AreEqual(1, enragedCount);
+            }
+            finally
+            {
+                BossAttackController.OnAnyBossEnraged -= HandleEnraged;
+                Object.DestroyImmediate(bossObj);
             }
         }
     }

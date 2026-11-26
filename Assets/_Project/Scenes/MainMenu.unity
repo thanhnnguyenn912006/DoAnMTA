@@ -2435,7 +2435,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "WASD / M\u0169i t\xEAn: Di chuy\u1EC3n  |  Space / Shift: L\u01B0\u1EDBt  |  1/2/3: Ch\u1ECDn th\u1EBB  |  ESC: T\u1EA1m d\u1EEBng"
+  m_text: "WASD / M\u0169i t\xEAn: Di chuy\u1EC3n  |  Space / Shift: L\u01B0\u1EDBt  |  1/2/3 & R: Ch\u1ECDn / \u0110\u1ED5i th\u1EBB  |  ESC: T\u1EA1m d\u1EEBng"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 81ae04ba477de63489515395a58cfe53, type: 2}
   m_sharedMaterial: {fileID: -7077954027361140263, guid: 81ae04ba477de63489515395a58cfe53, type: 2}

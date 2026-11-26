@@ -44,6 +44,10 @@ namespace SurvivorGame.Enemies
         [SerializeField, Min(0)] private int enrageExtraProjectiles = 4;
         [SerializeField, Range(0.5f, 1f)] private float enrageCooldownMultiplier = 0.75f;
 
+        public static event System.Action<BossAttackController> OnAnyBossEnraged;
+
+        private static Material s_telegraphMaterial;
+
         private Rigidbody2D _rb;
         private SpriteRenderer _spriteRenderer;
         private EnemyChaseMovement _movement;
@@ -51,6 +55,7 @@ namespace SurvivorGame.Enemies
         private Health _health;
         private Transform _target;
         private ComponentPool<EnemyProjectile> _projectilePool;
+        private LineRenderer _dashTelegraph;
 
         private BossState _state = BossState.Chasing;
         private float _stateTimer;
@@ -59,6 +64,7 @@ namespace SurvivorGame.Enemies
         private float _burstAngleOffset;
         private Vector2 _dashDirection;
         private int _currentProjectileDamage;
+        private bool _enrageAnnounced;
 
         public int CurrentProjectileDamage => _currentProjectileDamage;
 
@@ -90,7 +96,14 @@ namespace SurvivorGame.Enemies
             _burstTimer = 1.8f;
             _dashTimer = 3.5f;
             _burstAngleOffset = 0f;
+            _enrageAnnounced = false;
             _movement.SetCanMove(true);
+            HideDashTelegraph();
+        }
+
+        private void OnDisable()
+        {
+            HideDashTelegraph();
         }
 
         /// <summary>
@@ -103,7 +116,21 @@ namespace SurvivorGame.Enemies
 
         private void Update()
         {
-            if (_health.IsDead || _target == null) return;
+            if (_health.IsDead)
+            {
+                HideDashTelegraph();
+                return;
+            }
+
+            if (!_enrageAnnounced && IsEnraged)
+            {
+                _enrageAnnounced = true;
+                CameraShake.Instance?.Shake(0.24f, 0.25f);
+                AudioManager.Instance?.PlaySfx(SoundId.BossWarning, 1f, 0.2f);
+                OnAnyBossEnraged?.Invoke(this);
+            }
+
+            if (_target == null) return;
 
             switch (_state)
             {
@@ -173,23 +200,107 @@ namespace SurvivorGame.Enemies
             {
                 _spriteRenderer.color = windupWarningColor;
             }
+
+            ShowDashTelegraph();
         }
 
         private void UpdateWindupState()
         {
-            // Nhấp nháy cảnh báo nhẹ trong lúc gồng để người chơi dễ nhận biết
+            // Nhấp nháy cảnh báo thân Boss và vạch đỏ chỉ hướng lao trên mặt đất
+            float pulse = Mathf.PingPong(Time.time * 14f, 1f);
             if (_spriteRenderer != null)
             {
-                float pulse = Mathf.PingPong(Time.time * 14f, 1f);
                 _spriteRenderer.color = Color.Lerp(GetBaseTintColor(), windupWarningColor, pulse);
             }
+
+            UpdateDashTelegraphVisual(pulse);
 
             _stateTimer -= Time.deltaTime;
             if (_stateTimer <= 0f)
             {
                 _state = BossState.Dashing;
                 _stateTimer = dashDuration;
+                HideDashTelegraph();
                 RestoreBaseColor();
+            }
+        }
+
+        private void EnsureDashTelegraph()
+        {
+            if (_dashTelegraph != null) return;
+
+            GameObject lineObj = new GameObject("BossDashTelegraph");
+            lineObj.transform.SetParent(transform, false);
+            _dashTelegraph = lineObj.AddComponent<LineRenderer>();
+            _dashTelegraph.useWorldSpace = true;
+            _dashTelegraph.positionCount = 2;
+            _dashTelegraph.startWidth = 0.75f;
+            _dashTelegraph.endWidth = 0.25f;
+            _dashTelegraph.numCapVertices = 2;
+            _dashTelegraph.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            _dashTelegraph.receiveShadows = false;
+
+            Material mat = GetTelegraphMaterial();
+            if (mat != null)
+            {
+                _dashTelegraph.sharedMaterial = mat;
+            }
+
+            if (_spriteRenderer != null)
+            {
+                _dashTelegraph.sortingLayerID = _spriteRenderer.sortingLayerID;
+                _dashTelegraph.sortingOrder = _spriteRenderer.sortingOrder - 2;
+            }
+
+            _dashTelegraph.enabled = false;
+        }
+
+        private Material GetTelegraphMaterial()
+        {
+            if (s_telegraphMaterial == null)
+            {
+                Shader shader = Shader.Find("Universal Render Pipeline/2D/Sprite-Unlit-Default");
+                if (shader == null) shader = Shader.Find("Sprites/Default");
+                if (shader != null)
+                {
+                    s_telegraphMaterial = new Material(shader)
+                    {
+                        hideFlags = HideFlags.DontSave
+                    };
+                }
+            }
+            return s_telegraphMaterial != null ? s_telegraphMaterial : (_spriteRenderer != null ? _spriteRenderer.sharedMaterial : null);
+        }
+
+        private void ShowDashTelegraph()
+        {
+            EnsureDashTelegraph();
+            if (_dashTelegraph == null) return;
+
+            UpdateDashTelegraphVisual(1f);
+            _dashTelegraph.enabled = true;
+        }
+
+        private void UpdateDashTelegraphVisual(float pulse)
+        {
+            if (_dashTelegraph == null) return;
+
+            float dashDistance = dashSpeed * dashDuration;
+            Vector3 start = transform.position;
+            Vector3 end = start + new Vector3(_dashDirection.x * dashDistance, _dashDirection.y * dashDistance, 0f);
+            _dashTelegraph.SetPosition(0, start);
+            _dashTelegraph.SetPosition(1, end);
+
+            float alpha = Mathf.Lerp(0.28f, 0.74f, pulse);
+            _dashTelegraph.startColor = new Color(1f, 0.16f, 0.14f, alpha);
+            _dashTelegraph.endColor = new Color(1f, 0.62f, 0.12f, alpha * 0.7f);
+        }
+
+        private void HideDashTelegraph()
+        {
+            if (_dashTelegraph != null)
+            {
+                _dashTelegraph.enabled = false;
             }
         }
 

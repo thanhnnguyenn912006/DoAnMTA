@@ -43,6 +43,10 @@ namespace SurvivorGame.UI
         [SerializeField] private Camera mainCamera;
         [SerializeField, Min(20f)] private float indicatorEdgePadding = 54f;
 
+        [Header("Cảnh báo máu thấp (< 30% HP)")]
+        [SerializeField] private Image lowHpVignetteImage;
+        [SerializeField, Range(0.1f, 0.5f)] private float lowHpThreshold = 0.30f;
+
         [Header("Đồng hồ, Điểm & Số quái hạ")]
         [SerializeField] private TMP_Text timerText;
         [SerializeField] private TMP_Text scoreText;
@@ -55,6 +59,7 @@ namespace SurvivorGame.UI
         private int _lastDashTenths = -1;
         private bool _hasDashFillColor;
         private bool _lastDashReady;
+        private bool _isLowHp;
 
         private bool _isShowingBanner;
         private float _bannerTimer;
@@ -102,10 +107,13 @@ namespace SurvivorGame.UI
 
             HideAnnouncementBanner();
             HideBossIndicator();
+            HideLowHpVignette();
         }
 
         private void OnEnable()
         {
+            BossAttackController.OnAnyBossEnraged += HandleBossEnraged;
+
             if (gameManager != null)
             {
                 gameManager.OnScoreAndKillsChanged += HandleScoreAndKillsChanged;
@@ -133,6 +141,8 @@ namespace SurvivorGame.UI
 
         private void OnDisable()
         {
+            BossAttackController.OnAnyBossEnraged -= HandleBossEnraged;
+
             if (gameManager != null)
             {
                 gameManager.OnScoreAndKillsChanged -= HandleScoreAndKillsChanged;
@@ -184,6 +194,7 @@ namespace SurvivorGame.UI
             UpdateDashDisplay(force: false);
             UpdateAnnouncementBanner();
             UpdateBossOffscreenIndicator();
+            UpdateLowHpVignette();
         }
 
         private void HandleHealthChanged(int currentHp, int maxHp)
@@ -195,6 +206,11 @@ namespace SurvivorGame.UI
 
             _lastHp = safeHp;
             _lastMaxHp = safeMaxHp;
+            _isLowHp = safeHp > 0 && ((float)safeHp / safeMaxHp) <= lowHpThreshold;
+            if (!_isLowHp)
+            {
+                HideLowHpVignette();
+            }
 
             if (playerHealthSlider != null)
             {
@@ -276,7 +292,13 @@ namespace SurvivorGame.UI
             {
                 HideAnnouncementBanner();
                 HideBossIndicator();
+                HideLowHpVignette();
             }
+        }
+
+        private void HandleBossEnraged(BossAttackController boss)
+        {
+            ShowAnnouncementBanner("BOSS CUỒNG NỘ! TĂNG TỐC ĐẠN & LAO TỚI!", BossBannerColor);
         }
 
         private void HandlePhaseChanged(int phaseIndex, string phaseName)
@@ -361,6 +383,41 @@ namespace SurvivorGame.UI
             if (bossOffscreenIndicator != null && bossOffscreenIndicator.gameObject.activeSelf)
             {
                 bossOffscreenIndicator.gameObject.SetActive(false);
+            }
+        }
+
+        private void UpdateLowHpVignette()
+        {
+            if (lowHpVignetteImage == null) return;
+
+            bool shouldShow = _isLowHp &&
+                              (gameManager == null || gameManager.CurrentState == GameState.Playing);
+
+            if (!shouldShow)
+            {
+                HideLowHpVignette();
+                return;
+            }
+
+            if (!lowHpVignetteImage.gameObject.activeSelf)
+            {
+                lowHpVignetteImage.gameObject.SetActive(true);
+            }
+
+            float pulse = 0.5f + 0.5f * Mathf.Sin(Time.unscaledTime * 5.5f);
+            Color c = lowHpVignetteImage.color;
+            c.r = 1f;
+            c.g = 1f;
+            c.b = 1f;
+            c.a = Mathf.Lerp(0.22f, 0.62f, pulse);
+            lowHpVignetteImage.color = c;
+        }
+
+        private void HideLowHpVignette()
+        {
+            if (lowHpVignetteImage != null && lowHpVignetteImage.gameObject.activeSelf)
+            {
+                lowHpVignetteImage.gameObject.SetActive(false);
             }
         }
 

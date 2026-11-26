@@ -52,14 +52,23 @@ namespace SurvivorGame.Systems
         [Header("Danh sách nâng cấp bị động khả dụng")]
         [SerializeField] private PassiveUpgradeData[] availablePassives;
         [SerializeField, Min(1)] private int choicesPerLevelUp = 3;
+        [SerializeField, Min(0)] private int rerollsPerRun = 3;
 
         private readonly List<UpgradeOption> _candidatePool = new List<UpgradeOption>();
         private readonly List<UpgradeOption> _currentChoices = new List<UpgradeOption>();
+        private readonly List<string> _previousChoiceTitles = new List<string>(4);
 
         private int _pendingLevelUps;
+        private int _remainingRerolls;
         private bool _isChoosingUpgrade;
 
         public bool IsChoosingUpgrade => _isChoosingUpgrade;
+        public int RemainingRerolls => _remainingRerolls;
+        public bool CanReroll =>
+            _isChoosingUpgrade &&
+            _remainingRerolls > 0 &&
+            _candidatePool.Count > _currentChoices.Count &&
+            !IsGameEnded();
 
         // Sự kiện phát sang UpgradePanelUI, WeaponBarHUD, ChestRewardPanelUI và GameplayAudioBridge
         public event Action<IReadOnlyList<UpgradeOption>> OnUpgradeChoicesReady;
@@ -69,6 +78,8 @@ namespace SurvivorGame.Systems
 
         private void Awake()
         {
+            _remainingRerolls = rerollsPerRun;
+
             if (playerExperience == null || playerStats == null)
             {
                 GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
@@ -334,6 +345,48 @@ namespace SurvivorGame.Systems
 
             _isChoosingUpgrade = true;
             OnUpgradeChoicesReady.Invoke(_currentChoices);
+        }
+
+        /// <summary>
+        /// Đổi sang bộ thẻ nâng cấp ngẫu nhiên mới nếu còn lượt đổi và còn thẻ khác trong bể ứng viên.
+        /// </summary>
+        public bool TryRerollChoices()
+        {
+            if (!CanReroll) return false;
+
+            _previousChoiceTitles.Clear();
+            for (int i = 0; i < _currentChoices.Count; i++)
+            {
+                _previousChoiceTitles.Add(_currentChoices[i].Title);
+            }
+
+            _remainingRerolls--;
+            BuildCandidatePool();
+
+            // Thử tối đa 4 lần để đảm bảo bộ thẻ mới khác ít nhất 1 lựa chọn so với bộ vừa đổi
+            for (int attempt = 0; attempt < 4; attempt++)
+            {
+                PickRandomChoices();
+                if (!HasSameChoiceSetAsPrevious()) break;
+            }
+
+            AudioManager.Instance?.PlayButtonClick();
+            OnUpgradeChoicesReady?.Invoke(_currentChoices);
+            return true;
+        }
+
+        private bool HasSameChoiceSetAsPrevious()
+        {
+            if (_currentChoices.Count != _previousChoiceTitles.Count) return false;
+
+            for (int i = 0; i < _currentChoices.Count; i++)
+            {
+                if (!_previousChoiceTitles.Contains(_currentChoices[i].Title))
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
         /// <summary>

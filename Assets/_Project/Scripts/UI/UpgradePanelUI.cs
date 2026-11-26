@@ -1,11 +1,13 @@
 ﻿using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 using SurvivorGame.Systems;
 
 namespace SurvivorGame.UI
 {
     /// <summary>
-    /// Lắng nghe UpgradeManager để bật/tắt bảng chọn nâng cấp và đổ dữ liệu vào 3 thẻ.
+    /// Lắng nghe UpgradeManager để bật/tắt bảng chọn nâng cấp, nút Đổi thẻ (Reroll) và đổ dữ liệu vào 3 thẻ.
     /// Gắn script này lên đối tượng luôn bật (ví dụ Canvas), KHÔNG gắn lên Panel bị tắt sẵn.
     /// </summary>
     public class UpgradePanelUI : MonoBehaviour
@@ -14,6 +16,8 @@ namespace SurvivorGame.UI
         [SerializeField] private UpgradeManager upgradeManager;
         [SerializeField] private GameObject panelRoot;
         [SerializeField] private UpgradeCardUI[] cards;
+        [SerializeField] private Button rerollButton;
+        [SerializeField] private TMP_Text rerollButtonText;
 
         private bool _isOpen;
         private int _activeChoiceCount;
@@ -38,6 +42,11 @@ namespace SurvivorGame.UI
                 upgradeManager.OnUpgradeChoicesReady += HandleChoicesReady;
                 upgradeManager.OnUpgradeMenuClosed += HandleMenuClosed;
             }
+
+            if (rerollButton != null)
+            {
+                rerollButton.onClick.AddListener(HandleRerollClicked);
+            }
         }
 
         private void OnDisable()
@@ -47,11 +56,16 @@ namespace SurvivorGame.UI
                 upgradeManager.OnUpgradeChoicesReady -= HandleChoicesReady;
                 upgradeManager.OnUpgradeMenuClosed -= HandleMenuClosed;
             }
+
+            if (rerollButton != null)
+            {
+                rerollButton.onClick.RemoveListener(HandleRerollClicked);
+            }
         }
 
         private void Update()
         {
-            // Chỉ nhận phím tắt 1, 2, 3 khi bảng thực sự đang mở và trận chưa kết thúc
+            // Chỉ nhận phím tắt 1, 2, 3 và R khi bảng thực sự đang mở và trận chưa kết thúc
             if (!CanAcceptSelection()) return;
 
             if (_activeChoiceCount >= 1 && Input.GetKeyDown(KeyCode.Alpha1))
@@ -65,6 +79,10 @@ namespace SurvivorGame.UI
             else if (_activeChoiceCount >= 3 && Input.GetKeyDown(KeyCode.Alpha3))
             {
                 HandleCardSelected(2);
+            }
+            else if (Input.GetKeyDown(KeyCode.R))
+            {
+                HandleRerollClicked();
             }
         }
 
@@ -111,6 +129,7 @@ namespace SurvivorGame.UI
             }
 
             _isOpen = true;
+            RefreshRerollButton();
             panelRoot.SetActive(true);
         }
 
@@ -129,6 +148,31 @@ namespace SurvivorGame.UI
         {
             if (!CanAcceptSelection() || upgradeManager == null) return;
             upgradeManager.SelectUpgrade(index);
+        }
+
+        private void HandleRerollClicked()
+        {
+            if (!CanAcceptSelection() || upgradeManager == null) return;
+            if (upgradeManager.TryRerollChoices())
+            {
+                RefreshRerollButton();
+            }
+        }
+
+        private void RefreshRerollButton()
+        {
+            if (rerollButton == null) return;
+
+            int remaining = upgradeManager != null ? upgradeManager.RemainingRerolls : 0;
+            bool canReroll = upgradeManager != null && upgradeManager.CanReroll;
+            rerollButton.interactable = canReroll;
+
+            if (rerollButtonText != null)
+            {
+                rerollButtonText.text = remaining > 0
+                    ? $"ĐỔI THẺ [R] ({remaining})"
+                    : "HẾT LƯỢT ĐỔI (0)";
+            }
         }
     }
 }
