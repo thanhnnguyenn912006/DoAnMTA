@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db82d459f309c114f831d01fd62c7645, type: 3}
+  m_Name: Character_Mage
+  m_EditorClassIdentifier: SurvivorGame.Runtime::SurvivorGame.Data.CharacterData
+  characterId: mage
+  characterName: "Ph\xE1p S\u01B0"
+  startingWeaponLabel: "C\u1EA7u N\u0103ng L\u01B0\u1EE3ng"
+  statSummary: "90 HP  |  +10% S\xE1t th\u01B0\u01A1ng"
+  idleSprite: {fileID: 21300000, guid: e95c957c3d34206418708063a7e9a7e0, type: 3}
+  walkFrames:
+  - {fileID: 21300000, guid: e95c957c3d34206418708063a7e9a7e0, type: 3}
+  - {fileID: 21300000, guid: 7a9e31c3727eed444a94ad0d5ebcf0fb, type: 3}
+  accentColor: {r: 0.21960784, g: 0.7411765, b: 0.972549, a: 1}
+  startingWeaponType: 1
+  maxHealth: 90
+  moveSpeed: 5
+  baseDamageMultiplier: 1.1

@@ -19,7 +19,9 @@ namespace SurvivorGame.Systems
         PickupHeal,
         PickupMagnet,
         WeaponEvolve,
-        BossWarning
+        BossWarning,
+        ExpPickup,
+        ChestOpen
     }
 
     /// <summary>
@@ -49,6 +51,8 @@ namespace SurvivorGame.Systems
                 SoundId.PickupMagnet => CreateSweep("SFX_PickupMagnet", 0.24f, 260f, 920f, 0.42f, 1.3f, 0.08f, 112),
                 SoundId.WeaponEvolve => CreateArpeggio("SFX_WeaponEvolve", new[] { 523.25f, 659.25f, 783.99f, 1046.50f, 1318.51f }, 0.09f, 0.50f),
                 SoundId.BossWarning => CreateBossSiren("SFX_BossWarning", 0.65f, 0.45f),
+                SoundId.ExpPickup => CreateSweep("SFX_ExpPickup", 0.048f, 880f, 1320f, 0.28f, 2.4f, 0f, 113),
+                SoundId.ChestOpen => CreateArpeggio("SFX_ChestOpen", new[] { 523.25f, 659.25f, 783.99f, 1046.50f, 1174.66f, 1567.98f }, 0.075f, 0.48f),
                 _ => CreateSweep("SFX_Default", 0.05f, 440f, 320f, 0.3f, 2f, 0f, 100)
             };
         }

@@ -25,6 +25,10 @@ namespace SurvivorGame.Enemies
         [SerializeField, Min(12f)] private float maxEnemyDistance = 24f;
         [SerializeField, Min(0.1f)] private float relocateCheckInterval = 0.5f;
 
+        [Header("Quái Tinh Anh (Elite - rơi Rương Báu)")]
+        [SerializeField] private EnemyData eliteEnemyData;
+        [SerializeField] private float[] eliteSpawnTimes = { 50f, 100f };
+
         [Header("Trạng thái (chỉ đọc để theo dõi trong Inspector)")]
         [SerializeField] private float elapsedTime;
         [SerializeField] private int activeEnemyCount;
@@ -33,6 +37,7 @@ namespace SurvivorGame.Enemies
         private float _spawnTimer;
         private float _relocateTimer;
         private int _lastAnnouncedPhaseIndex;
+        private int _nextEliteSpawnIndex;
         private ComponentPool<EnemyController> _defaultEnemyPool;
         private readonly List<EnemyController> _activeEnemies = new List<EnemyController>(160);
 
@@ -43,6 +48,7 @@ namespace SurvivorGame.Enemies
 
         // Sự kiện phát khi chuyển sang giai đoạn sinh quái mới (phaseIndex, phaseName)
         public event System.Action<int, string> OnPhaseChanged;
+        public event System.Action<EnemyController> OnEliteSpawned;
 
         private void Awake()
         {
@@ -107,10 +113,37 @@ namespace SurvivorGame.Enemies
                 OnPhaseChanged?.Invoke(phaseIndex, currentPhase.phaseName);
             }
 
+            TrySpawnScheduledElite();
+
             if (_spawnTimer > 0f) return;
 
             _spawnTimer = currentPhase.spawnInterval;
             SpawnBatch(currentPhase);
+        }
+
+        private void TrySpawnScheduledElite()
+        {
+            if (eliteEnemyData == null || eliteSpawnTimes == null || _nextEliteSpawnIndex >= eliteSpawnTimes.Length)
+            {
+                return;
+            }
+
+            if (elapsedTime < eliteSpawnTimes[_nextEliteSpawnIndex])
+            {
+                return;
+            }
+
+            _nextEliteSpawnIndex++;
+            float hpMult = spawnConfig.GetHpMultiplier(elapsedTime);
+            float speedMult = spawnConfig.GetSpeedMultiplier(elapsedTime);
+            float dmgMult = spawnConfig.GetDamageMultiplier(elapsedTime);
+
+            Vector3 spawnPos = GetSpawnPositionOutsideCamera();
+            EnemyController elite = SpawnEnemyInstance(eliteEnemyData, spawnPos, hpMult, speedMult, dmgMult);
+            if (elite != null)
+            {
+                OnEliteSpawned?.Invoke(elite);
+            }
         }
 
         private void UpdateOutOfRangeEnemies()
@@ -189,6 +222,16 @@ namespace SurvivorGame.Enemies
             float speedMult,
             float dmgMult)
         {
+            SpawnEnemyInstance(data, spawnPos, hpMult, speedMult, dmgMult);
+        }
+
+        private EnemyController SpawnEnemyInstance(
+            EnemyData data,
+            Vector3 spawnPos,
+            float hpMult,
+            float speedMult,
+            float dmgMult)
+        {
             EnemyController targetPrefab = ResolvePrefab(data);
             EnemyController enemy;
 
@@ -213,6 +256,7 @@ namespace SurvivorGame.Enemies
             }
 
             activeEnemyCount = _activeEnemies.Count;
+            return enemy;
         }
 
         private EnemyController ResolvePrefab(EnemyData data)

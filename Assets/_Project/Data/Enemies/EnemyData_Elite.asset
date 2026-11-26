@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 893874dbc745839438e996667f65bfe7, type: 3}
+  m_Name: EnemyData_Elite
+  m_EditorClassIdentifier: SurvivorGame.Runtime::SurvivorGame.Data.EnemyData
+  enemyId: enemy_elite
+  enemyName: "Qu\xE1i Tinh Anh"
+  maxHealth: 320
+  moveSpeed: 1.85
+  contactDamage: 24
+  expValue: 45
+  scoreValue: 120
+  customSprite: {fileID: 21300000, guid: 34cea8a9ce837ee47b60321e8f9faadd, type: 3}
+  walkFrames:
+  - {fileID: 21300000, guid: 34cea8a9ce837ee47b60321e8f9faadd, type: 3}
+  - {fileID: 21300000, guid: a81e6412f636902488b42cc805a58f0f, type: 3}
+  frameInterval: 0.22
+  tintColor: {r: 0.98039216, g: 0.8, b: 0.08235294, a: 1}
+  scale: 1.45
+  customPrefab: {fileID: 0}

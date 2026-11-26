@@ -19,6 +19,7 @@ namespace SurvivorGame.Weapons
         protected float _damageMultiplier = 1f;
         protected float _cooldownMultiplier = 1f;
         protected bool _isEvolved;
+        private int _totalDamageDealt;
 
         // Thời gian chờ ngắn khi không tìm thấy mục tiêu để tránh quét vật lý mỗi frame
         private const float RetryDelayWhenNoTarget = 0.1f;
@@ -28,6 +29,7 @@ namespace SurvivorGame.Weapons
         public int MaxLevel => weaponData != null ? weaponData.MaxLevel : 1;
         public bool IsMaxLevel => currentLevel >= MaxLevel;
         public bool IsEvolved => _isEvolved;
+        public int TotalDamageDealt => _totalDamageDealt;
         public WeaponLevelStats CurrentStats => _isEvolved ? weaponData.EvolvedStats : weaponData.GetStats(currentLevel);
 
         /// <summary>
@@ -75,9 +77,21 @@ namespace SurvivorGame.Weapons
             weaponData = data;
             currentLevel = Mathf.Clamp(startLevel, 1, MaxLevel);
             _isEvolved = false;
+            _totalDamageDealt = 0;
             _cooldownTimer = 0f;
             OnStatsUpdated();
             OnLevelChanged?.Invoke(this, currentLevel);
+        }
+
+        /// <summary>
+        /// Ghi nhận sát thương thực tế vũ khí vừa gây ra để hiển thị bảng thống kê cuối trận (0 GC).
+        /// </summary>
+        public void RecordDamageDealt(int amount)
+        {
+            if (amount > 0)
+            {
+                _totalDamageDealt += amount;
+            }
         }
 
         /// <summary>

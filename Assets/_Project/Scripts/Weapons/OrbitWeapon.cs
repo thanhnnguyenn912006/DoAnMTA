@@ -111,7 +111,7 @@ namespace SurvivorGame.Weapons
 
                 if (shouldBeActive)
                 {
-                    _orbs[i].Configure(damage, hitCooldown, enemyLayer, evolvedTint, scaleMultiplier);
+                    _orbs[i].Configure(damage, hitCooldown, enemyLayer, evolvedTint, scaleMultiplier, this);
                 }
             }
         }

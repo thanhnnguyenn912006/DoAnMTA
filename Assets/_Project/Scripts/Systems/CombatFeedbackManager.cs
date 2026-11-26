@@ -20,6 +20,7 @@ namespace SurvivorGame.Systems
         [SerializeField] private Color normalDamageColor = Color.white;
         [SerializeField] private Color heavyDamageColor = new Color(1f, 0.85f, 0.2f, 1f);  // Vàng nổi bật (>= 30 dmg)
         [SerializeField] private Color playerDamageColor = new Color(0.97f, 0.32f, 0.32f, 1f); // Đỏ khi Player trúng đòn
+        [SerializeField] private Color healPopupColor = new Color(0.29f, 0.87f, 0.50f, 1f);    // Xanh lá khi hồi máu
         [SerializeField, Min(1)] private int heavyDamageThreshold = 30;
 
         [Header("Cường độ rung Camera")]
@@ -49,13 +50,32 @@ namespace SurvivorGame.Systems
         private void OnEnable()
         {
             Health.OnAnyDamaged += HandleAnyDamaged;
+            Health.OnAnyHealed += HandleAnyHealed;
             EnemyController.OnAnyEnemyDied += HandleEnemyDied;
         }
 
         private void OnDisable()
         {
             Health.OnAnyDamaged -= HandleAnyDamaged;
+            Health.OnAnyHealed -= HandleAnyHealed;
             EnemyController.OnAnyEnemyDied -= HandleEnemyDied;
+        }
+
+        private void HandleAnyHealed(Health targetHealth, int healedAmount)
+        {
+            if (targetHealth == null || healedAmount <= 0 || damagePopupPrefab == null) return;
+
+            Vector3 spawnPos = targetHealth.transform.position + new Vector3(0f, 0.55f, 0f);
+            if (_popupPool != null)
+            {
+                DamagePopup popup = _popupPool.Get(spawnPos, Quaternion.identity);
+                popup.InitializeHeal(healedAmount, healPopupColor, 1.1f, _popupPool.ReleaseCallback);
+            }
+            else
+            {
+                DamagePopup popup = Instantiate(damagePopupPrefab, spawnPos, Quaternion.identity);
+                popup.InitializeHeal(healedAmount, healPopupColor, 1.1f, null);
+            }
         }
 
         private void HandleAnyDamaged(Health targetHealth, int damageAmount)

@@ -164,6 +164,7 @@ namespace SurvivorGame.Systems
         private void Collect()
         {
             _isCollected = true;
+            AudioManager.Instance?.PlayExpPickup();
             _collector.AddExp(_expValue);
             Despawn();
         }

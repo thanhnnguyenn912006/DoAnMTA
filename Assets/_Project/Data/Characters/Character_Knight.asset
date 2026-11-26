@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db82d459f309c114f831d01fd62c7645, type: 3}
+  m_Name: Character_Knight
+  m_EditorClassIdentifier: SurvivorGame.Runtime::SurvivorGame.Data.CharacterData
+  characterId: knight
+  characterName: "Hi\u1EC7p S\u0129"
+  startingWeaponLabel: "S\xF3ng Xung K\xEDch"
+  statSummary: "120 HP  |  T\u1ED1c 4.7  |  Ch\u1ED1ng ch\u1ECBu"
+  idleSprite: {fileID: 21300000, guid: a2db716cbfa4f9946a275f5584357844, type: 3}
+  walkFrames:
+  - {fileID: 21300000, guid: a2db716cbfa4f9946a275f5584357844, type: 3}
+  - {fileID: 21300000, guid: b0207a8c2fa80dd448be11ccccca3c5f, type: 3}
+  accentColor: {r: 0.98039216, g: 0.8, b: 0.08235294, a: 1}
+  startingWeaponType: 2
+  maxHealth: 120
+  moveSpeed: 4.7
+  baseDamageMultiplier: 1

@@ -10,6 +10,7 @@ namespace SurvivorGame.Systems
     public class Health : MonoBehaviour
     {
         public static event Action<Health, int> OnAnyDamaged;
+        public static event Action<Health, int> OnAnyHealed;
 
         [Header("Cấu hình máu")]
         [SerializeField, Min(1)] private int maxHealth = 100;
@@ -17,6 +18,14 @@ namespace SurvivorGame.Systems
 
         private int _currentHealth;
         private float _invincibilityTimer;
+#if UNITY_EDITOR
+        private bool _editorGodMode;
+        public bool EditorGodMode
+        {
+            get => _editorGodMode;
+            set => _editorGodMode = value;
+        }
+#endif
 
         public int CurrentHealth => _currentHealth;
         public int MaxHealth => maxHealth;
@@ -91,6 +100,9 @@ namespace SurvivorGame.Systems
 
         public void TakeDamage(int amount)
         {
+#if UNITY_EDITOR
+            if (_editorGodMode) return;
+#endif
             if (amount <= 0 || IsDead || IsInvincible) return;
 
             _currentHealth = Mathf.Max(0, _currentHealth - amount);
@@ -114,8 +126,15 @@ namespace SurvivorGame.Systems
         {
             if (amount <= 0 || IsDead) return;
 
+            int previousHealth = _currentHealth;
             _currentHealth = Mathf.Min(maxHealth, _currentHealth + amount);
-            OnHealthChanged?.Invoke(_currentHealth, maxHealth);
+            int actualHealed = _currentHealth - previousHealth;
+
+            if (actualHealed > 0)
+            {
+                OnAnyHealed?.Invoke(this, actualHealed);
+                OnHealthChanged?.Invoke(_currentHealth, maxHealth);
+            }
         }
     }
 }

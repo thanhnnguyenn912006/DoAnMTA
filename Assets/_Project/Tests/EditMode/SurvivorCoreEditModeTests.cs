@@ -441,5 +441,264 @@ namespace SurvivorGame.Tests.EditMode
                 Object.DestroyImmediate(weaponData);
             }
         }
+
+        [Test]
+        public void Health_Heal_RaisesOnAnyHealedWithActualHealedAmountOnly()
+        {
+            GameObject go = new GameObject("HealthHealEventTest");
+            int eventCount = 0;
+            int lastHealed = 0;
+            void OnHealed(Health h, int amt)
+            {
+                if (h.gameObject == go)
+                {
+                    eventCount++;
+                    lastHealed = amt;
+                }
+            }
+
+            try
+            {
+                Health.OnAnyHealed += OnHealed;
+                Health health = go.AddComponent<Health>();
+                InvokeLifecycle(health, "Awake");
+                health.Initialize(100, 0f);
+
+                // Đầy máu -> không phát sự kiện hồi máu giả
+                health.Heal(25);
+                Assert.AreEqual(0, eventCount);
+
+                // Mất 15 HP rồi hồi 25 -> chỉ hồi thực tế 15 HP và phát đúng 15
+                health.TakeDamage(15);
+                health.Heal(25);
+                Assert.AreEqual(100, health.CurrentHealth);
+                Assert.AreEqual(1, eventCount);
+                Assert.AreEqual(15, lastHealed);
+            }
+            finally
+            {
+                Health.OnAnyHealed -= OnHealed;
+                Object.DestroyImmediate(go);
+            }
+        }
+
+        [Test]
+        public void WeaponBase_RecordDamageDealt_AccumulatesAndResetsOnInitialize()
+        {
+            GameObject go = new GameObject("WeaponDamageTrackingTest");
+            WeaponData data = ScriptableObject.CreateInstance<WeaponData>();
+            try
+            {
+                DummyWeapon weapon = go.AddComponent<DummyWeapon>();
+                weapon.Initialize(data, 1);
+
+                weapon.RecordDamageDealt(45);
+                weapon.RecordDamageDealt(120);
+                weapon.RecordDamageDealt(-10);
+                Assert.AreEqual(165, weapon.TotalDamageDealt);
+
+                weapon.Initialize(data, 1);
+                Assert.AreEqual(0, weapon.TotalDamageDealt);
+            }
+            finally
+            {
+                Object.DestroyImmediate(go);
+                Object.DestroyImmediate(data);
+            }
+        }
+
+        [Test]
+        public void PlayerCharacterSelector_ApplyCharacter_AppliesStatsAndEnablesOnlyStarterWeapon()
+        {
+            GameObject playerObj = new GameObject("PlayerCharSelectTest");
+            GameObject gunObj = new GameObject("Gun");
+            GameObject orbObj = new GameObject("Orb");
+            GameObject pulseObj = new GameObject("Pulse");
+            WeaponData gunData = ScriptableObject.CreateInstance<WeaponData>();
+            WeaponData orbData = ScriptableObject.CreateInstance<WeaponData>();
+            WeaponData pulseData = ScriptableObject.CreateInstance<WeaponData>();
+            CharacterData mage = ScriptableObject.CreateInstance<CharacterData>();
+            try
+            {
+                gunObj.transform.SetParent(playerObj.transform);
+                orbObj.transform.SetParent(playerObj.transform);
+                pulseObj.transform.SetParent(playerObj.transform);
+
+                void SetWeaponType(WeaponData d, WeaponType t)
+                {
+                    SerializedObject so = new SerializedObject(d);
+                    so.FindProperty("weaponType").enumValueIndex = (int)t;
+                    so.ApplyModifiedPropertiesWithoutUndo();
+                }
+                SetWeaponType(gunData, WeaponType.AutoTarget);
+                SetWeaponType(orbData, WeaponType.Orbit);
+                SetWeaponType(pulseData, WeaponType.AreaPulse);
+
+                SerializedObject charSo = new SerializedObject(mage);
+                charSo.FindProperty("characterName").stringValue = "Pháp Sư";
+                charSo.FindProperty("startingWeaponType").enumValueIndex = (int)WeaponType.Orbit;
+                charSo.FindProperty("maxHealth").intValue = 90;
+                charSo.FindProperty("moveSpeed").floatValue = 5.2f;
+                charSo.FindProperty("baseDamageMultiplier").floatValue = 1.1f;
+                charSo.ApplyModifiedPropertiesWithoutUndo();
+
+                playerObj.AddComponent<Rigidbody2D>();
+                PlayerMovement movement = playerObj.AddComponent<PlayerMovement>();
+                Health health = playerObj.AddComponent<Health>();
+                PlayerExperience exp = playerObj.AddComponent<PlayerExperience>();
+                PlayerStats stats = playerObj.AddComponent<PlayerStats>();
+                PlayerCharacterSelector selector = playerObj.AddComponent<PlayerCharacterSelector>();
+
+                InvokeLifecycle(movement, "Awake");
+                InvokeLifecycle(health, "Awake");
+                InvokeLifecycle(exp, "Awake");
+                InvokeLifecycle(stats, "Awake");
+
+                DummyWeapon gun = gunObj.AddComponent<DummyWeapon>();
+                DummyWeapon orb = orbObj.AddComponent<DummyWeapon>();
+                DummyWeapon pulse = pulseObj.AddComponent<DummyWeapon>();
+                gun.Initialize(gunData, 1);
+                orb.Initialize(orbData, 1);
+                pulse.Initialize(pulseData, 1);
+
+                selector.ApplyCharacter(mage);
+
+                Assert.AreEqual(90, health.MaxHealth);
+                Assert.AreEqual(90, health.CurrentHealth);
+                Assert.AreEqual(5.2f, movement.MoveSpeed, 0.0001f);
+                Assert.AreEqual(1.1f, stats.DamageMultiplier, 0.0001f);
+                Assert.IsFalse(gunObj.activeSelf);
+                Assert.IsTrue(orbObj.activeSelf);
+                Assert.IsFalse(pulseObj.activeSelf);
+            }
+            finally
+            {
+                Object.DestroyImmediate(playerObj);
+                Object.DestroyImmediate(gunData);
+                Object.DestroyImmediate(orbData);
+                Object.DestroyImmediate(pulseData);
+                Object.DestroyImmediate(mage);
+            }
+        }
+
+        [Test]
+        public void UpgradeManager_GrantChestReward_PrioritizesEvolutionThenLevelUpThenFallback()
+        {
+            GameObject playerObj = new GameObject("PlayerChestRewardTest");
+            GameObject weaponObj = new GameObject("ChestWeapon");
+            GameObject mgrObj = new GameObject("ChestManager");
+            PassiveUpgradeData catalyst = ScriptableObject.CreateInstance<PassiveUpgradeData>();
+            WeaponData weaponData = ScriptableObject.CreateInstance<WeaponData>();
+            try
+            {
+                weaponObj.transform.SetParent(playerObj.transform);
+
+                SerializedObject pSo = new SerializedObject(catalyst);
+                pSo.FindProperty("upgradeId").stringValue = "p_chest";
+                pSo.FindProperty("upgradeName").stringValue = "Xúc tác";
+                pSo.FindProperty("upgradeType").enumValueIndex = (int)PassiveUpgradeType.DamagePercent;
+                pSo.FindProperty("maxLevel").intValue = 1;
+                pSo.FindProperty("valuePerLevel").floatValue = 0.1f;
+                pSo.ApplyModifiedPropertiesWithoutUndo();
+
+                SerializedObject wSo = new SerializedObject(weaponData);
+                wSo.FindProperty("weaponName").stringValue = "Súng Test";
+                SerializedProperty lvs = wSo.FindProperty("levels");
+                lvs.arraySize = 2;
+                for (int i = 0; i < 2; i++)
+                {
+                    SerializedProperty lv = lvs.GetArrayElementAtIndex(i);
+                    lv.FindPropertyRelative("damage").intValue = 10 + i * 10;
+                    lv.FindPropertyRelative("cooldown").floatValue = 0.5f;
+                    lv.FindPropertyRelative("range").floatValue = 6f;
+                    lv.FindPropertyRelative("projectileSpeed").floatValue = 12f;
+                    lv.FindPropertyRelative("projectileCount").intValue = 1;
+                    lv.FindPropertyRelative("upgradeDescription").stringValue = "Mô tả";
+                }
+                wSo.FindProperty("hasEvolution").boolValue = true;
+                wSo.FindProperty("evolutionCatalyst").objectReferenceValue = catalyst;
+                wSo.FindProperty("evolvedWeaponName").stringValue = "Súng Tiến Hóa";
+                wSo.ApplyModifiedPropertiesWithoutUndo();
+
+                Health health = playerObj.AddComponent<Health>();
+                PlayerExperience exp = playerObj.AddComponent<PlayerExperience>();
+                PlayerStats stats = playerObj.AddComponent<PlayerStats>();
+                InvokeLifecycle(health, "Awake");
+                InvokeLifecycle(exp, "Awake");
+                InvokeLifecycle(stats, "Awake");
+                health.Initialize(100, 0f);
+
+                DummyWeapon weapon = weaponObj.AddComponent<DummyWeapon>();
+                weapon.Initialize(weaponData, 1);
+
+                UpgradeManager manager = mgrObj.AddComponent<UpgradeManager>();
+                SerializedObject mSo = new SerializedObject(manager);
+                mSo.FindProperty("playerExperience").objectReferenceValue = exp;
+                mSo.FindProperty("playerStats").objectReferenceValue = stats;
+                mSo.FindProperty("weaponsContainer").objectReferenceValue = playerObj.transform;
+                SerializedProperty passivesProp = mSo.FindProperty("availablePassives");
+                passivesProp.arraySize = 1;
+                passivesProp.GetArrayElementAtIndex(0).objectReferenceValue = catalyst;
+                mSo.ApplyModifiedPropertiesWithoutUndo();
+
+                // 1. Chưa đủ điều kiện tiến hóa -> Rương nâng cấp +1 cấp vũ khí (Lv.1 -> Lv.2)
+                ChestRewardResult r1 = manager.GrantChestReward();
+                Assert.IsFalse(r1.IsEvolution);
+                Assert.AreEqual(2, weapon.CurrentLevel);
+
+                // 2. Vũ khí đã max nhưng chưa có bị động -> Rương trao bị động Cấp 1
+                ChestRewardResult r2 = manager.GrantChestReward();
+                Assert.IsFalse(r2.IsEvolution);
+                Assert.AreEqual(1, stats.GetPassiveLevel(catalyst));
+
+                // 3. Đủ điều kiện tiến hóa -> Rương ưu tiên tiến hóa ngay
+                ChestRewardResult r3 = manager.GrantChestReward();
+                Assert.IsTrue(r3.IsEvolution);
+                Assert.IsTrue(weapon.IsEvolved);
+                Assert.AreEqual("Súng Tiến Hóa", r3.Title);
+
+                // 4. Tất cả đã max -> Fallback hồi +30 HP
+                health.TakeDamage(50);
+                ChestRewardResult r4 = manager.GrantChestReward();
+                Assert.IsFalse(r4.IsEvolution);
+                Assert.AreEqual(80, health.CurrentHealth);
+            }
+            finally
+            {
+                Object.DestroyImmediate(mgrObj);
+                Object.DestroyImmediate(playerObj);
+                Object.DestroyImmediate(weaponData);
+                Object.DestroyImmediate(catalyst);
+            }
+        }
+
+        [Test]
+        public void GameManager_ChestRewardState_PausesAndResumesTimeScaleSafely()
+        {
+            GameObject go = new GameObject("GameManagerChestStateTest");
+            float originalScale = Time.timeScale;
+            try
+            {
+                GameManager gm = go.AddComponent<GameManager>();
+                InvokeLifecycle(gm, "Awake");
+
+                Assert.AreEqual(GameState.Playing, gm.CurrentState);
+                Assert.IsTrue(gm.TryBeginChestReward());
+                Assert.AreEqual(GameState.ChestReward, gm.CurrentState);
+                Assert.AreEqual(0f, Time.timeScale, 0.0001f);
+
+                // Không mở chồng khi đã ở trạng thái ChestReward
+                Assert.IsFalse(gm.TryBeginChestReward());
+
+                gm.EndChestReward();
+                Assert.AreEqual(GameState.Playing, gm.CurrentState);
+                Assert.AreEqual(1f, Time.timeScale, 0.0001f);
+            }
+            finally
+            {
+                Time.timeScale = originalScale;
+                Object.DestroyImmediate(go);
+            }
+        }
     }
 }

@@ -23,6 +23,7 @@ namespace SurvivorGame.Weapons
         private int _remainingPierces;
         private readonly Health[] _hitTargets = new Health[8];
         private int _hitCount;
+        private WeaponBase _sourceWeapon;
         private Action<Projectile> _returnToPoolCallback;
 
         private void Awake()
@@ -54,7 +55,8 @@ namespace SurvivorGame.Weapons
             float lifetime = -1f,
             Action<Projectile> returnToPoolCallback = null,
             int pierceCount = 0,
-            Color? tintColor = null)
+            Color? tintColor = null,
+            WeaponBase sourceWeapon = null)
         {
             Vector2 dir = direction.sqrMagnitude > 0.0001f ? direction.normalized : Vector2.right;
 
@@ -62,6 +64,7 @@ namespace SurvivorGame.Weapons
             _lifeTimer = lifetime > 0f ? lifetime : defaultLifetime;
             _hasHit = false;
             _remainingPierces = Mathf.Max(0, pierceCount);
+            _sourceWeapon = sourceWeapon;
             ClearHitTargets();
             _returnToPoolCallback = returnToPoolCallback;
 
@@ -91,7 +94,9 @@ namespace SurvivorGame.Weapons
                     _hitTargets[_hitCount++] = targetHealth;
                 }
 
+                int hpBefore = targetHealth.CurrentHealth;
                 targetHealth.TakeDamage(_damage);
+                _sourceWeapon?.RecordDamageDealt(hpBefore - targetHealth.CurrentHealth);
 
                 if (_remainingPierces > 0)
                 {
@@ -131,6 +136,7 @@ namespace SurvivorGame.Weapons
         private void Despawn()
         {
             _rb.linearVelocity = Vector2.zero;
+            _sourceWeapon = null;
             ClearHitTargets();
 
             if (_returnToPoolCallback != null)

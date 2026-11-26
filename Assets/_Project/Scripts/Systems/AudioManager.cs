@@ -31,6 +31,8 @@ namespace SurvivorGame.Systems
         [SerializeField] private AudioClip customPickupMagnetClip;
         [SerializeField] private AudioClip customWeaponEvolveClip;
         [SerializeField] private AudioClip customBossWarningClip;
+        [SerializeField] private AudioClip customExpPickupClip;
+        [SerializeField] private AudioClip customChestOpenClip;
 
         [Header("Cấu hình bộ phát")]
         [SerializeField, Range(0f, 1f)] private float defaultBgmVolume = 0.45f;
@@ -44,6 +46,8 @@ namespace SurvivorGame.Systems
         private AudioSource _uiSfxSource;
         private AudioSource[] _sfxSources;
         private int _nextSfxChannel;
+        private float _lastExpPickupTime = -10f;
+        private int _expPickupCombo;
 
         public float BgmVolume { get; private set; }
         public float SfxVolume { get; private set; }
@@ -108,6 +112,8 @@ namespace SurvivorGame.Systems
             RegisterClip(SoundId.PickupMagnet, customPickupMagnetClip);
             RegisterClip(SoundId.WeaponEvolve, customWeaponEvolveClip);
             RegisterClip(SoundId.BossWarning, customBossWarningClip);
+            RegisterClip(SoundId.ExpPickup, customExpPickupClip);
+            RegisterClip(SoundId.ChestOpen, customChestOpenClip);
         }
 
         private void RegisterClip(SoundId id, AudioClip customClip)
@@ -179,10 +185,43 @@ namespace SurvivorGame.Systems
                 case SoundId.PickupMagnet:
                 case SoundId.WeaponEvolve:
                 case SoundId.BossWarning:
+                case SoundId.ChestOpen:
                     return true;
                 default:
                     return false;
             }
+        }
+
+        /// <summary>
+        /// Phát tiếng nhặt ngọc EXP tăng dần cao độ khi nhặt liên tiếp (kiểu Vampire Survivors) có chống nghẽn kênh.
+        /// </summary>
+        public void PlayExpPickup()
+        {
+            if (SfxVolume <= 0.001f || !_clips.TryGetValue(SoundId.ExpPickup, out AudioClip clip) || clip == null)
+            {
+                return;
+            }
+
+            float now = Time.unscaledTime;
+            if (now - _lastExpPickupTime < 0.045f)
+            {
+                return;
+            }
+
+            if (now - _lastExpPickupTime <= 0.35f)
+            {
+                _expPickupCombo = Mathf.Min(_expPickupCombo + 1, 14);
+            }
+            else
+            {
+                _expPickupCombo = 0;
+            }
+            _lastExpPickupTime = now;
+
+            AudioSource channel = _sfxSources[_nextSfxChannel];
+            _nextSfxChannel = (_nextSfxChannel + 1) % _sfxSources.Length;
+            channel.pitch = 1f + _expPickupCombo * 0.035f;
+            channel.PlayOneShot(clip, Mathf.Clamp01(SfxVolume * 0.65f));
         }
 
         public void PlayButtonClick()

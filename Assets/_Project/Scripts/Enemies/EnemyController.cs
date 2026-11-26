@@ -36,6 +36,7 @@ namespace SurvivorGame.Enemies
 
         public EnemyData Data => _currentData;
         public Health Health => _health;
+        public bool IsElite => _currentData != null && _currentData.EnemyId == "enemy_elite";
 
         // Sự kiện toàn cục khi có quái bị tiêu diệt (cho hệ thống EXP, Điểm, Âm thanh, VFX lắng nghe)
         public static event Action<EnemyController> OnAnyEnemyDied;

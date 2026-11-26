@@ -212,6 +212,14 @@ namespace SurvivorGame.Player
         }
 
         /// <summary>
+        /// Thiết lập tốc độ di chuyển gốc theo nhân vật được chọn khi bắt đầu trận.
+        /// </summary>
+        public void SetBaseMoveSpeed(float speed)
+        {
+            moveSpeed = Mathf.Max(0.5f, speed);
+        }
+
+        /// <summary>
         /// Tăng tốc độ di chuyển (dùng khi người chơi chọn nâng cấp tốc chạy).
         /// </summary>
         public void AddMoveSpeed(float amount)

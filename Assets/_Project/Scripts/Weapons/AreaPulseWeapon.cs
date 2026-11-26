@@ -70,7 +70,9 @@ namespace SurvivorGame.Weapons
 
                 if (col.TryGetComponent<Health>(out Health enemyHealth) && !enemyHealth.IsDead)
                 {
+                    int hpBefore = enemyHealth.CurrentHealth;
                     enemyHealth.TakeDamage(damage);
+                    RecordDamageDealt(hpBefore - enemyHealth.CurrentHealth);
 
                     if (knockbackForce > 0f &&
                         !enemyHealth.IsDead &&

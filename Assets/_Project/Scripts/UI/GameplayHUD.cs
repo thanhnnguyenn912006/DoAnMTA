@@ -38,6 +38,11 @@ namespace SurvivorGame.UI
         [SerializeField, Min(0.5f)] private float bannerHoldDuration = 2.8f;
         [SerializeField, Min(0.1f)] private float bannerFadeDuration = 0.6f;
 
+        [Header("Mũi tên chỉ hướng Boss ngoài màn hình")]
+        [SerializeField] private RectTransform bossOffscreenIndicator;
+        [SerializeField] private Camera mainCamera;
+        [SerializeField, Min(20f)] private float indicatorEdgePadding = 54f;
+
         [Header("Đồng hồ, Điểm & Số quái hạ")]
         [SerializeField] private TMP_Text timerText;
         [SerializeField] private TMP_Text scoreText;
@@ -54,9 +59,17 @@ namespace SurvivorGame.UI
         private bool _isShowingBanner;
         private float _bannerTimer;
         private Color _bannerBaseColor = WaveBannerColor;
+        private Transform _activeBossTransform;
+        private RectTransform _hudRectTransform;
 
         private void Awake()
         {
+            _hudRectTransform = transform as RectTransform;
+            if (mainCamera == null)
+            {
+                mainCamera = Camera.main;
+            }
+
             if (gameManager == null)
             {
                 gameManager = FindAnyObjectByType<GameManager>();
@@ -88,6 +101,7 @@ namespace SurvivorGame.UI
             }
 
             HideAnnouncementBanner();
+            HideBossIndicator();
         }
 
         private void OnEnable()
@@ -106,12 +120,14 @@ namespace SurvivorGame.UI
             if (enemySpawner != null)
             {
                 enemySpawner.OnPhaseChanged += HandlePhaseChanged;
+                enemySpawner.OnEliteSpawned += HandleEliteSpawned;
             }
 
             if (bossSpawner != null)
             {
                 bossSpawner.OnBossWarning += HandleBossWarning;
                 bossSpawner.OnBossSpawned += HandleBossSpawned;
+                bossSpawner.OnBossDefeated += HandleBossDefeated;
             }
         }
 
@@ -131,12 +147,14 @@ namespace SurvivorGame.UI
             if (enemySpawner != null)
             {
                 enemySpawner.OnPhaseChanged -= HandlePhaseChanged;
+                enemySpawner.OnEliteSpawned -= HandleEliteSpawned;
             }
 
             if (bossSpawner != null)
             {
                 bossSpawner.OnBossWarning -= HandleBossWarning;
                 bossSpawner.OnBossSpawned -= HandleBossSpawned;
+                bossSpawner.OnBossDefeated -= HandleBossDefeated;
             }
         }
 
@@ -165,6 +183,7 @@ namespace SurvivorGame.UI
 
             UpdateDashDisplay(force: false);
             UpdateAnnouncementBanner();
+            UpdateBossOffscreenIndicator();
         }
 
         private void HandleHealthChanged(int currentHp, int maxHp)
@@ -256,6 +275,7 @@ namespace SurvivorGame.UI
             if (state == GameState.GameOver || state == GameState.Victory)
             {
                 HideAnnouncementBanner();
+                HideBossIndicator();
             }
         }
 
@@ -267,6 +287,11 @@ namespace SurvivorGame.UI
             ShowAnnouncementBanner(message, WaveBannerColor);
         }
 
+        private void HandleEliteSpawned(EnemyController elite)
+        {
+            ShowAnnouncementBanner("QUÁI TINH ANH XUẤT HIỆN! HẠ ĐỂ NHẬN RƯƠNG!", WaveBannerColor);
+        }
+
         private void HandleBossWarning(string message)
         {
             ShowAnnouncementBanner(
@@ -276,10 +301,67 @@ namespace SurvivorGame.UI
 
         private void HandleBossSpawned(EnemyController boss, Health bossHealth)
         {
+            _activeBossTransform = boss != null ? boss.transform : null;
             string bossName = (boss != null && boss.Data != null && !string.IsNullOrEmpty(boss.Data.EnemyName))
                 ? boss.Data.EnemyName.ToUpperInvariant()
                 : "BOSS";
             ShowAnnouncementBanner($"BOSS XUẤT HIỆN: {bossName}!", BossBannerColor);
+        }
+
+        private void HandleBossDefeated(EnemyController boss)
+        {
+            _activeBossTransform = null;
+            HideBossIndicator();
+        }
+
+        private void UpdateBossOffscreenIndicator()
+        {
+            if (bossOffscreenIndicator == null) return;
+
+            if (_activeBossTransform == null || !_activeBossTransform.gameObject.activeInHierarchy || mainCamera == null)
+            {
+                HideBossIndicator();
+                return;
+            }
+
+            Vector3 vp = mainCamera.WorldToViewportPoint(_activeBossTransform.position);
+            bool isOnScreen = vp.z > 0f && vp.x >= 0.03f && vp.x <= 0.97f && vp.y >= 0.03f && vp.y <= 0.97f;
+            if (isOnScreen)
+            {
+                HideBossIndicator();
+                return;
+            }
+
+            if (!bossOffscreenIndicator.gameObject.activeSelf)
+            {
+                bossOffscreenIndicator.gameObject.SetActive(true);
+            }
+
+            Vector2 dir = new Vector2(vp.x - 0.5f, vp.y - 0.5f);
+            if (vp.z < 0f) dir = -dir;
+            if (dir.sqrMagnitude < 0.0001f) dir = Vector2.right;
+
+            Rect hudRect = _hudRectTransform != null ? _hudRectTransform.rect : new Rect(-960f, -540f, 1920f, 1080f);
+            float halfW = Mathf.Max(60f, hudRect.width * 0.5f - indicatorEdgePadding);
+            float halfH = Mathf.Max(60f, hudRect.height * 0.5f - indicatorEdgePadding);
+
+            float scaleX = Mathf.Abs(dir.x) > 0.0001f ? halfW / Mathf.Abs(dir.x) : float.MaxValue;
+            float scaleY = Mathf.Abs(dir.y) > 0.0001f ? halfH / Mathf.Abs(dir.y) : float.MaxValue;
+            float edgeScale = Mathf.Min(scaleX, scaleY);
+
+            bossOffscreenIndicator.anchoredPosition = dir * edgeScale;
+            float angleDeg = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+            bossOffscreenIndicator.localEulerAngles = new Vector3(0f, 0f, angleDeg);
+            float pulse = 1f + Mathf.Sin(Time.unscaledTime * 8f) * 0.12f;
+            bossOffscreenIndicator.localScale = new Vector3(pulse, pulse, 1f);
+        }
+
+        private void HideBossIndicator()
+        {
+            if (bossOffscreenIndicator != null && bossOffscreenIndicator.gameObject.activeSelf)
+            {
+                bossOffscreenIndicator.gameObject.SetActive(false);
+            }
         }
 
         private void ShowAnnouncementBanner(string message, Color color)

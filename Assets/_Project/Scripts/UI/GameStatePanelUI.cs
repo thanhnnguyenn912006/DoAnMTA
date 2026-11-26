@@ -1,19 +1,22 @@
-﻿using TMPro;
+﻿using System.Text;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using SurvivorGame.Systems;
+using SurvivorGame.Weapons;
 
 namespace SurvivorGame.UI
 {
     /// <summary>
     /// Điều khiển hiển thị màn hình Tạm dừng (Pause) và màn hình Kết thúc (Game Over / Victory)
-    /// theo trạng thái của GameManager.
+    /// kèm bảng thống kê sát thương từng vũ khí theo trạng thái của GameManager.
     /// </summary>
     public class GameStatePanelUI : MonoBehaviour
     {
         [Header("Tham chiếu hệ thống")]
         [SerializeField] private GameManager gameManager;
         [SerializeField] private GameObject upgradePanelRoot;
+        [SerializeField] private Transform weaponsContainer;
 
         [Header("Màn hình Tạm dừng (Pause)")]
         [SerializeField] private GameObject pausePanelRoot;
@@ -37,6 +40,15 @@ namespace SurvivorGame.UI
             if (gameManager == null)
             {
                 gameManager = FindAnyObjectByType<GameManager>();
+            }
+
+            if (weaponsContainer == null)
+            {
+                GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+                if (playerObj != null)
+                {
+                    weaponsContainer = playerObj.transform;
+                }
             }
         }
 
@@ -111,11 +123,56 @@ namespace SurvivorGame.UI
                 string timeText = GameManager.FormatTime(gameManager.SurvivalTime);
                 string recordSuffix = gameManager.IsNewHighScore ? " (MỚI!)" : string.Empty;
 
-                endStatsText.text =
-                    $"Thời gian sống sót: {timeText}\n" +
-                    $"Số quái đã hạ: {gameManager.KillCount}\n" +
-                    $"Điểm số: {gameManager.Score}\n" +
-                    $"Kỷ lục cao nhất: {gameManager.HighScore}{recordSuffix}";
+                StringBuilder sb = new StringBuilder(256);
+                sb.AppendLine($"Thời gian sống sót: {timeText}");
+                sb.AppendLine($"Số quái đã hạ: {gameManager.KillCount}");
+                sb.AppendLine($"Điểm số: {gameManager.Score}");
+                sb.Append($"Kỷ lục cao nhất: {gameManager.HighScore}{recordSuffix}");
+
+                AppendWeaponDamageBreakdown(sb);
+                endStatsText.text = sb.ToString();
+            }
+        }
+
+        private void AppendWeaponDamageBreakdown(StringBuilder sb)
+        {
+            if (weaponsContainer == null) return;
+
+            WeaponBase[] weapons = weaponsContainer.GetComponentsInChildren<WeaponBase>(true);
+            if (weapons == null || weapons.Length == 0) return;
+
+            // Sắp xếp giảm dần theo sát thương thực tế (số vũ khí rất nhỏ nên sắp xếp tại chỗ, 0 LINQ)
+            for (int i = 0; i < weapons.Length - 1; i++)
+            {
+                for (int j = i + 1; j < weapons.Length; j++)
+                {
+                    int dmgI = weapons[i] != null ? weapons[i].TotalDamageDealt : -1;
+                    int dmgJ = weapons[j] != null ? weapons[j].TotalDamageDealt : -1;
+                    if (dmgJ > dmgI)
+                    {
+                        (weapons[i], weapons[j]) = (weapons[j], weapons[i]);
+                    }
+                }
+            }
+
+            bool hasHeader = false;
+            for (int i = 0; i < weapons.Length; i++)
+            {
+                WeaponBase w = weapons[i];
+                if (w == null || w.Data == null) continue;
+                if (!w.gameObject.activeSelf && w.TotalDamageDealt <= 0) continue;
+
+                if (!hasHeader)
+                {
+                    sb.AppendLine();
+                    sb.AppendLine();
+                    sb.AppendLine("<color=#FACC15>THỐNG KÊ SÁT THƯƠNG VŨ KHÍ</color>");
+                    hasHeader = true;
+                }
+
+                string displayName = w.IsEvolved ? w.Data.EvolvedWeaponName : w.Data.WeaponName;
+                string badge = w.IsEvolved ? "[EVO]" : $"Lv.{w.CurrentLevel}";
+                sb.AppendLine($"{displayName} ({badge}): {w.TotalDamageDealt:N0}");
             }
         }
 

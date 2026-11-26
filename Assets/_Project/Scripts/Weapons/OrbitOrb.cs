@@ -18,6 +18,7 @@ namespace SurvivorGame.Weapons
         private Color _defaultColor = Color.white;
         private Vector3 _defaultScale = Vector3.one;
         private bool _hasCachedVisualDefaults;
+        private WeaponBase _sourceWeapon;
 
         // Lưu thời điểm gây sát thương gần nhất lên từng quái (tối đa ~150 quái từ Pool)
         private readonly Dictionary<Health, float> _lastHitTimes = new Dictionary<Health, float>();
@@ -45,13 +46,15 @@ namespace SurvivorGame.Weapons
             float hitCooldown,
             LayerMask enemyLayer,
             Color? tintColor = null,
-            float scaleMultiplier = 1f)
+            float scaleMultiplier = 1f,
+            WeaponBase sourceWeapon = null)
         {
             CacheVisualDefaultsIfNeeded();
 
             _damage = Mathf.Max(1, damage);
             _hitCooldown = Mathf.Max(0.05f, hitCooldown);
             _enemyLayer = enemyLayer;
+            _sourceWeapon = sourceWeapon;
 
             if (_spriteRenderer != null)
             {
@@ -91,7 +94,9 @@ namespace SurvivorGame.Weapons
             }
 
             _lastHitTimes[enemyHealth] = now;
+            int hpBefore = enemyHealth.CurrentHealth;
             enemyHealth.TakeDamage(_damage);
+            _sourceWeapon?.RecordDamageDealt(hpBefore - enemyHealth.CurrentHealth);
         }
     }
 }

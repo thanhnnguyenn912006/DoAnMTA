@@ -122,7 +122,7 @@ namespace SurvivorGame.Weapons
                 if (_projectilePool != null)
                 {
                     Projectile pooled = _projectilePool.Get(transform.position, Quaternion.identity);
-                    pooled.Initialize(direction, speed, damage, projectileLifetime, _projectilePool.ReleaseCallback, pierceCount, tintColor);
+                    pooled.Initialize(direction, speed, damage, projectileLifetime, _projectilePool.ReleaseCallback, pierceCount, tintColor, this);
                     return;
                 }
             }
@@ -130,7 +130,7 @@ namespace SurvivorGame.Weapons
             GameObject obj = Instantiate(weaponData.ProjectilePrefab, transform.position, Quaternion.identity);
             if (obj.TryGetComponent<Projectile>(out Projectile projectile))
             {
-                projectile.Initialize(direction, speed, damage, projectileLifetime, null, pierceCount, tintColor);
+                projectile.Initialize(direction, speed, damage, projectileLifetime, null, pierceCount, tintColor, this);
             }
         }
 

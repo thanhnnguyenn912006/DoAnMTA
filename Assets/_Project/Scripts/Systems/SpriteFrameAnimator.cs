@@ -25,6 +25,10 @@ namespace SurvivorGame.Systems
 
         public void SetFrames(Sprite[] newFrames, float newInterval)
         {
+            if (_spriteRenderer == null)
+            {
+                _spriteRenderer = GetComponent<SpriteRenderer>();
+            }
             frames = (newFrames != null && newFrames.Length > 0) ? newFrames : null;
             frameInterval = Mathf.Max(0.05f, newInterval);
             ResetAnimation();

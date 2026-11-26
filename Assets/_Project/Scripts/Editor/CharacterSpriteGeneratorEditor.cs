@@ -9,7 +9,7 @@ namespace SurvivorGame.EditorTools
     {
         private const string OutputFolder = "Assets/_Project/Art/Sprites/Characters";
 
-        [MenuItem("Tools/Survivor Arena/Tao Bo Sprite Nhan Vat & Quai (12 PNG)")]
+        [MenuItem("Tools/Survivor Arena/Tao Bo Sprite Nhan Vat & Quai (16 PNG)")]
         public static void GenerateAllCharacters()
         {
             if (!Directory.Exists(OutputFolder))
@@ -75,6 +75,116 @@ namespace SurvivorGame.EditorTools
                 "....KBBKKBBK....",
                 "....KKKKKKKK....",
             }, playerPalette);
+
+            // 1B. Player 2: Pháp Sư cầm trượng ngọc (16x16 - xanh dương hoàng gia viền vàng, tách biệt quái tím)
+            var magePalette = new Dictionary<char, Color>
+            {
+                ['K'] = Hex("#141026"), // Viền tối
+                ['B'] = Hex("#1D4ED8"), // Áo choàng & mũ xanh hoàng gia
+                ['b'] = Hex("#3B82F6"), // Ánh sáng xanh
+                ['d'] = Hex("#1E3A8A"), // Bóng áo xanh đậm
+                ['Y'] = Hex("#FACC15"), // Viền vàng kim
+                ['S'] = Hex("#FFCC99"), // Da
+                ['E'] = Hex("#111111"), // Mắt
+                ['W'] = Hex("#78350F"), // Thân trượng gỗ
+                ['C'] = Hex("#38BDF8"), // Ngọc phép xanh sáng
+                ['L'] = Hex("#FFFFFF"), // Điểm sáng ngọc
+            };
+
+            SaveGrid("Player_Mage_0.png", new[]
+            {
+                "......KK........",
+                ".....KbBK.......",
+                "....KbBBBK...KK.",
+                "...KbBBBBBK.KCLK",
+                "..KKYYYYYYKKKCCK",
+                ".KBBBBBBBBBBKKK.",
+                "..KKKSSSSKKK.KW.",
+                "....KSSESK...KW.",
+                "...KBBBBBBK..KW.",
+                "..KBbBYYBbBKKWK.",
+                "..KBbBYYBbBK.KW.",
+                "..KBBBBBBBBK.KW.",
+                "..KBdBYYBdBK.KW.",
+                ".KBBdBYYBdBBKKW.",
+                ".KddYYYYYYddKKK.",
+                ".KKKKKKKKKKKK...",
+            }, magePalette);
+
+            SaveGrid("Player_Mage_1.png", new[]
+            {
+                ".............KK.",
+                "......KK....KLCK",
+                ".....KbBK...KCCK",
+                "....KbBBBK...KK.",
+                "...KbBBBBBK..KW.",
+                "..KKYYYYYYKK.KW.",
+                ".KBBBBBBBBBBKKW.",
+                "..KKKSSESKKK.KW.",
+                "...KBBBBBBK..KW.",
+                "..KBbBYYBbBKKWK.",
+                "..KBbBYYBbBK.KW.",
+                "..KBBBBBBBBK.KW.",
+                "..KBdBYYBdBK.KW.",
+                "..KddYYYYddK.KK.",
+                "..KKKKKKKKKK....",
+                "................",
+            }, magePalette);
+
+            // 1C. Player 3: Hiệp Sĩ Thánh giáp bạc-vàng cầm búa xung chấn (16x16)
+            var knightPalette = new Dictionary<char, Color>
+            {
+                ['K'] = Hex("#14141E"), // Viền tối
+                ['O'] = Hex("#F97316"), // Mào mũ cam rực
+                ['o'] = Hex("#EA580C"), // Bóng mào mũ
+                ['A'] = Hex("#CBD5E1"), // Giáp thép bạc sáng
+                ['a'] = Hex("#94A3B8"), // Giáp bạc vừa
+                ['D'] = Hex("#475569"), // Khe mũ & bóng giáp tối
+                ['L'] = Hex("#F8FAFC"), // Ánh kim loại
+                ['Y'] = Hex("#FACC15"), // Viền vàng & đầu búa xung chấn
+                ['y'] = Hex("#CA8A04"), // Bóng vàng
+                ['W'] = Hex("#78350F"), // Cán búa gỗ
+            };
+
+            SaveGrid("Player_Knight_0.png", new[]
+            {
+                ".....KKKK.......",
+                "....KOOoOK......",
+                "...KOOoOOOK..KKK",
+                "...KKAAAALKKKYYK",
+                "..KAAALAAAAKYYyK",
+                "..KAADDDDDaKYYyK",
+                "..KAAaAAAaaKKWKK",
+                ".KKAAAYYAAAK.KW.",
+                "KAAaAAYYAAaAKKW.",
+                "KAAaAYYYYAaAKWK.",
+                ".KDaAAYYAAaKKW..",
+                "..KYYYYYYYYK.KK.",
+                "..KAAaAAaAAK....",
+                "..KAAK..KAAK....",
+                ".KDDK....KDDK...",
+                ".KKKK....KKKK...",
+            }, knightPalette);
+
+            SaveGrid("Player_Knight_1.png", new[]
+            {
+                ".............KKK",
+                ".....KKKK...KYYK",
+                "....KOOoOK..KYYK",
+                "...KOOoOOOK.KyyK",
+                "...KKAAAALKKKWKK",
+                "..KAAALAAAAK.KW.",
+                "..KAADDDDDaK.KW.",
+                "..KAAaAAAaaK.KW.",
+                ".KKAAAYYAAAKKWK.",
+                "KAAaAYYYYAaAKW..",
+                ".KDaAAYYAAaKKK..",
+                "..KYYYYYYYYK....",
+                "..KAAaAAaAAK....",
+                "...KAAKKAAK.....",
+                "...KDDKKDDK.....",
+                "...KKKKKKKK.....",
+            }, knightPalette);
 
             // 2. Normal Enemy: Zombie (16x16)
             var zombiePalette = new Dictionary<char, Color>
@@ -386,7 +496,7 @@ namespace SurvivorGame.EditorTools
                 }
             }
 
-            Debug.Log($"[CharacterSpriteGenerator] Da tao xong 12 Sprite nhan vat & quai tai: {OutputFolder}");
+            Debug.Log($"[CharacterSpriteGenerator] Da tao xong 16 Sprite nhan vat & quai tai: {OutputFolder}");
         }
 
         private static void SaveGrid(string fileName, string[] grid, Dictionary<char, Color> palette)

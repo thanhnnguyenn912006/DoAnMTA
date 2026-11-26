@@ -96,10 +96,20 @@ namespace SurvivorGame.Player
         }
 
         /// <summary>
+        /// Thiết lập hệ số sát thương gốc theo nhân vật được chọn lúc đầu trận.
+        /// </summary>
+        public void SetBaseDamageMultiplier(float multiplier)
+        {
+            damageMultiplier = Mathf.Max(0.1f, multiplier);
+            SyncAllWeapons();
+        }
+
+        /// <summary>
         /// Đồng bộ hệ số sát thương và hồi chiêu xuống toàn bộ vũ khí đang có.
         /// </summary>
         public void SyncAllWeapons()
         {
+            if (weaponsContainer == null) weaponsContainer = transform;
             WeaponBase[] weapons = weaponsContainer.GetComponentsInChildren<WeaponBase>();
             for (int i = 0; i < weapons.Length; i++)
             {

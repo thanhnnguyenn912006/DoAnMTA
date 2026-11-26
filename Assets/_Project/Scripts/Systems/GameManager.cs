@@ -11,6 +11,7 @@ namespace SurvivorGame.Systems
     {
         Playing,
         LevelUp,
+        ChestReward,
         Paused,
         GameOver,
         Victory
@@ -152,8 +153,9 @@ namespace SurvivorGame.Systems
                 TogglePause();
             }
 
-            // Chết đúng lúc đang mở bảng chọn nâng cấp vẫn phải kết thúc trận
-            if (currentState == GameState.LevelUp && playerHealth != null && playerHealth.IsDead)
+            // Chết đúng lúc đang mở bảng nâng cấp / rương vẫn phải kết thúc trận
+            if ((currentState == GameState.LevelUp || currentState == GameState.ChestReward) &&
+                playerHealth != null && playerHealth.IsDead)
             {
                 TriggerGameOver();
                 return;
@@ -280,6 +282,45 @@ namespace SurvivorGame.Systems
             {
                 SetState(GameState.Playing, 1f);
             }
+        }
+
+        /// <summary>
+        /// Tạm dừng trận đấu để hiển thị popup phần thưởng Rương Báu (chỉ khi đang Playing).
+        /// </summary>
+        public bool TryBeginChestReward()
+        {
+            if (_isPendingVictory || currentState != GameState.Playing)
+            {
+                return false;
+            }
+
+            SetState(GameState.ChestReward, 0f);
+            return true;
+        }
+
+        /// <summary>
+        /// Đóng popup Rương Báu và quay lại trạng thái Playing (không ghi đè GameOver/Victory).
+        /// </summary>
+        public void EndChestReward()
+        {
+            if (currentState == GameState.ChestReward)
+            {
+                SetState(GameState.Playing, 1f);
+            }
+        }
+
+        /// <summary>
+        /// Cộng điểm thưởng trực tiếp (ví dụ từ Rương khi đã nâng cấp tối đa toàn bộ trang bị).
+        /// </summary>
+        public void AddBonusScore(int points)
+        {
+            if (points <= 0 || currentState == GameState.GameOver || currentState == GameState.Victory)
+            {
+                return;
+            }
+
+            score += points;
+            OnScoreAndKillsChanged?.Invoke(score, killCount);
         }
 
         public void TriggerGameOver()

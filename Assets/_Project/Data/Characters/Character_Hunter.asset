@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db82d459f309c114f831d01fd62c7645, type: 3}
+  m_Name: Character_Hunter
+  m_EditorClassIdentifier: SurvivorGame.Runtime::SurvivorGame.Data.CharacterData
+  characterId: hunter
+  characterName: "Th\u1EE3 S\u0103n"
+  startingWeaponLabel: "\u0110\u1EA1n T\u1EF1 Nh\u1EAFm"
+  statSummary: "100 HP  |  T\u1ED1c 5.0  |  C\xE2n b\u1EB1ng"
+  idleSprite: {fileID: 21300000, guid: b21406b71bf05084988ec8f8407add9e, type: 3}
+  walkFrames:
+  - {fileID: 21300000, guid: b21406b71bf05084988ec8f8407add9e, type: 3}
+  - {fileID: 21300000, guid: 5eb9c40c889532d41a28c5edbf8259bb, type: 3}
+  accentColor: {r: 0.9372549, g: 0.26666668, b: 0.26666668, a: 1}
+  startingWeaponType: 0
+  maxHealth: 100
+  moveSpeed: 5
+  baseDamageMultiplier: 1

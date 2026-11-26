@@ -68,6 +68,29 @@ namespace SurvivorGame.Systems
             _velocity = new Vector3(driftX, floatSpeed, 0f);
         }
 
+        /// <summary>
+        /// Hiển thị số hồi máu màu xanh lá (+HP) tái sử dụng cùng Object Pool với DamagePopup.
+        /// </summary>
+        public void InitializeHeal(
+            int healAmount,
+            Color color,
+            float scaleMultiplier,
+            Action<DamagePopup> returnToPoolCallback)
+        {
+            _returnToPoolCallback = returnToPoolCallback;
+            _baseColor = color;
+            _baseScale = Mathf.Max(0.5f, scaleMultiplier);
+            _timer = 0f;
+            _isActive = true;
+
+            _tmp.SetText("+{0}", healAmount);
+            _tmp.color = _baseColor;
+            transform.localScale = Vector3.one * (_baseScale * 0.7f);
+
+            float driftX = UnityEngine.Random.Range(-horizontalDriftRange * 0.5f, horizontalDriftRange * 0.5f);
+            _velocity = new Vector3(driftX, floatSpeed, 0f);
+        }
+
         private void Update()
         {
             if (!_isActive) return;

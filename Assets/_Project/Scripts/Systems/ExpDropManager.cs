@@ -28,6 +28,9 @@ namespace SurvivorGame.Systems
         [SerializeField, Min(1)] private int healAmount = 25;
         [SerializeField, Min(0f)] private float pickupScatterRadius = 0.35f;
 
+        [Header("Rương Báu từ Quái Tinh Anh (Elite)")]
+        [SerializeField] private TreasureChest treasureChestPrefab;
+
         private Health _playerHealth;
         private ComponentPool<ExpGem> _gemPool;
         private ComponentPool<SpecialPickup> _pickupPool;
@@ -95,6 +98,13 @@ namespace SurvivorGame.Systems
             {
                 ExpGem gem = Instantiate(expGemPrefab, dropPos, Quaternion.identity);
                 gem.Initialize(expAmount, playerExperience, null);
+            }
+
+            if (deadEnemy.IsElite && treasureChestPrefab != null)
+            {
+                TreasureChest chest = Instantiate(treasureChestPrefab, deadEnemy.transform.position, Quaternion.identity);
+                chest.Initialize(playerExperience);
+                return;
             }
 
             TryDropSpecialPickup(deadEnemy);

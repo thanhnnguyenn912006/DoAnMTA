@@ -76,6 +76,7 @@ namespace SurvivorGame.UI
             {
                 upgradeManager.OnUpgradeChoicesReady += HandleChoicesReady;
                 upgradeManager.OnUpgradeMenuClosed += Refresh;
+                upgradeManager.OnChestRewardReady += HandleChestRewardReady;
             }
         }
 
@@ -85,6 +86,7 @@ namespace SurvivorGame.UI
             {
                 upgradeManager.OnUpgradeChoicesReady -= HandleChoicesReady;
                 upgradeManager.OnUpgradeMenuClosed -= Refresh;
+                upgradeManager.OnChestRewardReady -= HandleChestRewardReady;
             }
         }
 
@@ -96,6 +98,11 @@ namespace SurvivorGame.UI
         private void HandleChoicesReady(IReadOnlyList<UpgradeOption> _)
         {
             // Cập nhật ngay cả khi lên nhiều cấp liên tiếp và bảng chọn mở tiếp lượt sau
+            Refresh();
+        }
+
+        private void HandleChestRewardReady(ChestRewardResult _)
+        {
             Refresh();
         }
 
