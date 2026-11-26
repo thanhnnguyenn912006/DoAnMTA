@@ -52,7 +52,8 @@ MonoBehaviour:
   evolutionCatalyst: {fileID: 11400000, guid: de06b4e6666ab34488e4e2d26c4e75ad, type: 2}
   evolvedWeaponName: "Li\xEAn Thanh Xuy\xEAn Th\u1EA5u"
   evolvedIcon: {fileID: -3717379111909028777, guid: 7a89cdd49f8859f42b41806de8b24605, type: 3}
-  evolvedDescription: "Ti\u1EBFn h\xF3a: B\u1EAFn 3 vi\xEAn si\xEAu nhanh, s\xE1t th\u01B0\u01A1ng cao v\xE0 xuy\xEAn qua t\u1ED1i \u0111a 2 qu\xE1i"
+  evolvedVisualSprite: {fileID: 21300000, guid: 9f37a56c73e82dd499812093ec88664d, type: 3}
+  evolvedDescription: "Ti\u1EBFn h\xF3a: B\u1EAFn 3 th\u01B0\u01A1ng plasma si\xEAu nhanh, s\xE1t th\u01B0\u01A1ng cao v\xE0 xuy\xEAn qua t\u1ED1i \u0111a 2 qu\xE1i"
   evolvedStats:
     damage: 55
     cooldown: 0.3
@@ -60,6 +61,6 @@ MonoBehaviour:
     projectileSpeed: 19
     projectileCount: 3
     upgradeDescription: "Li\xEAn Thanh Xuy\xEAn Th\u1EA5u"
-  evolvedTintColor: {r: 0.98039216, g: 0.8, b: 0.08235294, a: 1}
+  evolvedTintColor: {r: 0, g: 0.8980392, b: 1, a: 1}
   evolvedProjectilePierce: 2
   evolvedKnockbackForce: 0

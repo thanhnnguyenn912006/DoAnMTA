@@ -23,6 +23,7 @@ namespace SurvivorGame.EditorTools
     public static class GameplayJuiceSetupEditor
     {
         private const string EffectsFolder = "Assets/_Project/Art/Sprites/Effects";
+        private const string ProjectilesFolder = "Assets/_Project/Art/Sprites/Projectiles";
         private const string CharactersArtFolder = "Assets/_Project/Art/Sprites/Characters";
         private const string CharactersDataFolder = "Assets/_Project/Data/Characters";
         private const string UiArtFolder = "Assets/_Project/Art/UI";
@@ -31,6 +32,10 @@ namespace SurvivorGame.EditorTools
         private const string MagnetSpritePath = EffectsFolder + "/Pickup_Magnet.png";
         private const string ChestSpritePath = EffectsFolder + "/Pickup_Chest.png";
         private const string BossArrowSpritePath = UiArtFolder + "/UI_BossArrow.png";
+
+        private const string AutoGunEvoVfxPath = ProjectilesFolder + "/Projectile_AutoGun_Evo.png";
+        private const string OrbitEvoVfxPath = EffectsFolder + "/Orb_Sawblade_Evo.png";
+        private const string AreaPulseEvoVfxPath = EffectsFolder + "/VFX_AreaPulse_Evo.png";
 
         private const string MoveSpeedIconPath = "Assets/_Project/Art/Icons/Icon_MoveSpeed.png";
         private const string AutoGunEvoIconPath = "Assets/_Project/Art/Icons/Icon_AutoGun_Evo.png";
@@ -114,8 +119,9 @@ namespace SurvivorGame.EditorTools
             CharacterSpriteGeneratorEditor.GenerateAllCharacters();
             IconGeneratorEditor.GenerateAllIcons();
 
-            // 2. Sinh sprite pixel-art Bình Máu, Nam Châm Lớn, Rương Báu và Mũi tên chỉ hướng Boss
+            // 2. Sinh sprite pixel-art Bình Máu, Nam Châm Lớn, Rương Báu, Mũi tên Boss & 3 VFX vũ khí tiến hóa
             GeneratePickupAndUiSprites();
+            GenerateEvolvedWeaponVfxSprites();
             Sprite healSprite = AssetDatabase.LoadAssetAtPath<Sprite>(HealSpritePath);
             Sprite chestSprite = AssetDatabase.LoadAssetAtPath<Sprite>(ChestSpritePath);
 
@@ -312,6 +318,206 @@ namespace SurvivorGame.EditorTools
             Object.DestroyImmediate(tex);
         }
 
+        private static void GenerateEvolvedWeaponVfxSprites()
+        {
+            if (!Directory.Exists(ProjectilesFolder)) Directory.CreateDirectory(ProjectilesFolder);
+            if (!Directory.Exists(EffectsFolder)) Directory.CreateDirectory(EffectsFolder);
+
+            // 1. Liên Thanh Xuyên Thấu (28x12): Thương plasma điện quang xanh lam-cyan lõi trắng, hướng sang PHẢI (+X)
+            var evoLancePalette = new Dictionary<char, Color>
+            {
+                ['K'] = Hex("#071630", 1f),
+                ['R'] = Hex("#2563EB", 1f),
+                ['O'] = Hex("#00B4FF", 1f),
+                ['Y'] = Hex("#00F0FF", 1f),
+                ['L'] = Hex("#CCFBF1", 1f),
+                ['W'] = Hex("#FFFFFF", 1f),
+                ['r'] = Hex("#2563EB", 0.55f),
+                ['y'] = Hex("#00F0FF", 0.78f)
+            };
+
+            SavePixelGrid(AutoGunEvoVfxPath, new[]
+            {
+                "............KKK.............",
+                "...........KRROKK...........",
+                "..........KROYYOOKK.........",
+                ".....rrKKKROYYLLYYOOKK......",
+                "..rryyOOYYYYWWWWWWLLYYOKK...",
+                "rryyOOYYWWWWWWWWWWWWWWLLWWK.",
+                "rryyOOYYWWWWWWWWWWWWWWLLWWK.",
+                "..rryyOOYYYYWWWWWWLLYYOKK...",
+                ".....rrKKKROYYLLYYOOKK......",
+                "..........KROYYOOKK.........",
+                "...........KRROKK...........",
+                "............KKK............."
+            }, evoLancePalette);
+
+            // 2. Vòng Lưỡi Cưa Hỏa Lực (24x24): Lưỡi cưa 8 răng cong rực lửa, rãnh tản nhiệt & lõi trắng nóng
+            GenerateSawbladeSprite(OrbitEvoVfxPath, 24);
+
+            // 3. Xung Chấn Đẩy Lùi (128x128, PPU=128 = đúng 1x1 unit): Vòng địa chấn hỏa diễm 16 gai + 8 tia năng lượng
+            GenerateEvolvedAreaPulseSprite(AreaPulseEvoVfxPath, 128);
+
+            AssetDatabase.Refresh();
+            ConfigurePixelSprite(AutoGunEvoVfxPath, 20f);
+            ConfigurePixelSprite(OrbitEvoVfxPath, 20f);
+            ConfigureUiSprite(AreaPulseEvoVfxPath, 128f);
+        }
+
+        private static void GenerateSawbladeSprite(string assetPath, int size)
+        {
+            Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+            float center = (size - 1) * 0.5f;
+            const int teeth = 8;
+            float sectorAngle = (Mathf.PI * 2f) / teeth;
+
+            Color outline = Hex("#2B0704", 1f);
+            Color crimson = Hex("#EF2318", 1f);
+            Color fireOrange = Hex("#FF6D00", 1f);
+            Color moltenGold = Hex("#FACC15", 1f);
+            Color brightTip = Hex("#FFF9C4", 1f);
+            Color hubGold = Hex("#FEF08A", 1f);
+            Color hotCore = Hex("#FFFFFF", 1f);
+            Color ventDark = Hex("#450A0A", 1f);
+
+            for (int y = 0; y < size; y++)
+            {
+                for (int x = 0; x < size; x++)
+                {
+                    float dx = x - center;
+                    float dy = y - center;
+                    float dist = Mathf.Sqrt(dx * dx + dy * dy);
+                    float angle = Mathf.Atan2(dy, dx);
+                    if (angle < 0f) angle += Mathf.PI * 2f;
+
+                    float phase = Mathf.Repeat((angle / sectorAngle) + dist * 0.045f, 1f);
+                    float toothOuterR = Mathf.Lerp(11.45f, 7.2f, Mathf.Pow(phase, 0.72f));
+
+                    Color col = Color.clear;
+                    if (dist <= toothOuterR)
+                    {
+                        float edgeDist = toothOuterR - dist;
+                        if (dist < 2.2f)
+                        {
+                            col = hotCore;
+                        }
+                        else if (dist < 3.6f)
+                        {
+                            col = hubGold;
+                        }
+                        else if (dist < 7.0f)
+                        {
+                            float spoke = Mathf.Abs(Mathf.Sin(angle * 2f));
+                            if (dist > 4.2f && dist < 6.4f && spoke > 0.86f)
+                            {
+                                col = ventDark;
+                            }
+                            else
+                            {
+                                col = dist < 5.5f ? moltenGold : fireOrange;
+                            }
+                        }
+                        else
+                        {
+                            if (dist >= 9.6f && phase < 0.22f)
+                            {
+                                col = brightTip;
+                            }
+                            else if (edgeDist < 1.05f)
+                            {
+                                col = outline;
+                            }
+                            else
+                            {
+                                col = phase < 0.45f ? fireOrange : crimson;
+                            }
+                        }
+                    }
+
+                    tex.SetPixel(x, y, col);
+                }
+            }
+
+            tex.Apply();
+            File.WriteAllBytes(assetPath, tex.EncodeToPNG());
+            Object.DestroyImmediate(tex);
+        }
+
+        private static void GenerateEvolvedAreaPulseSprite(string assetPath, int size)
+        {
+            Texture2D tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+            float center = (size - 1) * 0.5f;
+
+            // Tông tím hư không - hồng neon để tách biệt hẳn với đạn xanh lam và lưỡi cưa lửa đỏ-cam
+            Color deepVoid = Hex("#7E22CE", 1f);
+            Color neonMagenta = Hex("#D946EF", 1f);
+            Color vividOrchid = Hex("#C084FC", 1f);
+            Color brightCore = Hex("#FAF5FF", 1f);
+            Color innerRay = Hex("#F0ABFC", 1f);
+
+            for (int y = 0; y < size; y++)
+            {
+                for (int x = 0; x < size; x++)
+                {
+                    float dx = x - center;
+                    float dy = y - center;
+                    float dist = Mathf.Sqrt(dx * dx + dy * dy);
+                    float angle = Mathf.Atan2(dy, dx);
+
+                    float spikeWave = Mathf.Pow(0.5f + 0.5f * Mathf.Cos(angle * 16f), 2.4f);
+                    float ripple = Mathf.Sin(angle * 8f) * 1.6f;
+                    float outerEdge = 54.5f + spikeWave * 8.2f;
+
+                    Color col = Color.clear;
+                    if (dist <= outerEdge)
+                    {
+                        float aa = Mathf.Clamp01((outerEdge - dist) * 0.85f);
+
+                        if (dist >= 51.5f + ripple * 0.45f)
+                        {
+                            float t = Mathf.InverseLerp(51.5f + ripple * 0.45f, outerEdge, dist);
+                            col = Color.Lerp(neonMagenta, deepVoid, t);
+                            col.a = 0.96f * aa;
+                        }
+                        else if (dist >= 45.5f + ripple * 0.45f)
+                        {
+                            float t = Mathf.InverseLerp(45.5f + ripple * 0.45f, 51.5f + ripple * 0.45f, dist);
+                            col = Color.Lerp(vividOrchid, brightCore, 1f - Mathf.Abs(t * 2f - 1f));
+                            col.a = 1f;
+                        }
+                        else if (dist >= 34.5f + ripple)
+                        {
+                            float ringDist = Mathf.Abs(dist - (38.0f + ripple * 0.6f));
+                            if (ringDist < 2.2f)
+                            {
+                                col = Color.Lerp(vividOrchid, brightCore, 1f - ringDist / 2.2f);
+                                col.a = 0.86f;
+                            }
+                            else
+                            {
+                                float t = Mathf.InverseLerp(34.5f + ripple, 45.5f + ripple * 0.45f, dist);
+                                col = Color.Lerp(neonMagenta, vividOrchid, t);
+                                col.a = Mathf.Lerp(0.32f, 0.78f, t);
+                            }
+                        }
+                        else
+                        {
+                            float radialT = Mathf.Clamp01(dist / 34.5f);
+                            float ray = dist > 10f ? Mathf.Pow(Mathf.Abs(Mathf.Cos(angle * 4f)), 16f) : 0f;
+                            col = Color.Lerp(deepVoid, innerRay, Mathf.Clamp01(ray * 0.9f + radialT * 0.35f));
+                            col.a = Mathf.Clamp01(Mathf.Lerp(0.10f, 0.30f, radialT) + ray * 0.54f);
+                        }
+                    }
+
+                    tex.SetPixel(x, y, col);
+                }
+            }
+
+            tex.Apply();
+            File.WriteAllBytes(assetPath, tex.EncodeToPNG());
+            Object.DestroyImmediate(tex);
+        }
+
         private static CharacterData[] EnsureCharacterAssets()
         {
             if (!Directory.Exists(CharactersDataFolder))
@@ -472,12 +678,17 @@ namespace SurvivorGame.EditorTools
             Sprite orbitEvoIcon = AssetDatabase.LoadAssetAtPath<Sprite>(OrbitEvoIconPath);
             Sprite areaPulseEvoIcon = AssetDatabase.LoadAssetAtPath<Sprite>(AreaPulseEvoIconPath);
 
+            Sprite autoGunEvoVfx = AssetDatabase.LoadAssetAtPath<Sprite>(AutoGunEvoVfxPath);
+            Sprite orbitEvoVfx = AssetDatabase.LoadAssetAtPath<Sprite>(OrbitEvoVfxPath);
+            Sprite areaPulseEvoVfx = AssetDatabase.LoadAssetAtPath<Sprite>(AreaPulseEvoVfxPath);
+
             ConfigureSingleEvolution(
                 WeaponAutoGunPath,
                 cooldownPassive,
                 "Liên Thanh Xuyên Thấu",
                 autoGunEvoIcon,
-                "Tiến hóa: Bắn 3 viên siêu nhanh, sát thương cao và xuyên qua tối đa 2 quái",
+                autoGunEvoVfx,
+                "Tiến hóa: Bắn 3 thương plasma siêu nhanh, sát thương cao và xuyên qua tối đa 2 quái",
                 new WeaponLevelStats
                 {
                     damage = 55,
@@ -487,7 +698,7 @@ namespace SurvivorGame.EditorTools
                     projectileCount = 3,
                     upgradeDescription = "Liên Thanh Xuyên Thấu"
                 },
-                Hex("#FACC15", 1f),
+                Hex("#00E5FF", 1f),
                 pierce: 2,
                 knockback: 0f);
 
@@ -496,7 +707,8 @@ namespace SurvivorGame.EditorTools
                 damagePassive,
                 "Vòng Lưỡi Cưa Hỏa Lực",
                 orbitEvoIcon,
-                "Tiến hóa: 6 cầu lửa cỡ lớn xoay cực nhanh với bán kính rộng hơn",
+                orbitEvoVfx,
+                "Tiến hóa: 6 lưỡi cưa hỏa lực cỡ lớn tự xoay siêu tốc kèm vòng lửa bao quanh",
                 new WeaponLevelStats
                 {
                     damage = 50,
@@ -515,7 +727,8 @@ namespace SurvivorGame.EditorTools
                 maxHealthPassive,
                 "Xung Chấn Đẩy Lùi",
                 areaPulseEvoIcon,
-                "Tiến hóa: Sóng xung kích cực rộng, hồi nhanh và đẩy lùi quái thường",
+                areaPulseEvoVfx,
+                "Tiến hóa: Sóng địa chấn hư không kép cực rộng, hồi nhanh và đẩy lùi quái thường",
                 new WeaponLevelStats
                 {
                     damage = 68,
@@ -525,7 +738,7 @@ namespace SurvivorGame.EditorTools
                     projectileCount = 1,
                     upgradeDescription = "Xung Chấn Đẩy Lùi"
                 },
-                Hex("#F59E0B", 1f),
+                Hex("#C084FC", 1f),
                 pierce: 0,
                 knockback: 5.5f);
         }
@@ -535,6 +748,7 @@ namespace SurvivorGame.EditorTools
             PassiveUpgradeData catalyst,
             string evolvedName,
             Sprite evolvedIcon,
+            Sprite evolvedVisualSprite,
             string evolvedDesc,
             WeaponLevelStats stats,
             Color tintColor,
@@ -553,6 +767,7 @@ namespace SurvivorGame.EditorTools
             so.FindProperty("evolutionCatalyst").objectReferenceValue = catalyst;
             so.FindProperty("evolvedWeaponName").stringValue = evolvedName;
             so.FindProperty("evolvedIcon").objectReferenceValue = evolvedIcon;
+            so.FindProperty("evolvedVisualSprite").objectReferenceValue = evolvedVisualSprite;
             so.FindProperty("evolvedDescription").stringValue = evolvedDesc;
 
             SerializedProperty statsProp = so.FindProperty("evolvedStats");

@@ -113,8 +113,11 @@ namespace SurvivorGame.Weapons
         /// </summary>
         protected virtual void SpawnProjectile(Vector2 direction, float speed, int damage)
         {
-            int pierceCount = IsEvolved && weaponData != null ? weaponData.EvolvedProjectilePierce : 0;
-            Color? tintColor = IsEvolved && weaponData != null ? weaponData.EvolvedTintColor : (Color?)null;
+            bool evolved = IsEvolved && weaponData != null;
+            int pierceCount = evolved ? weaponData.EvolvedProjectilePierce : 0;
+            Color? tintColor = evolved ? weaponData.EvolvedTintColor : (Color?)null;
+            Sprite overrideSprite = evolved ? weaponData.EvolvedVisualSprite : null;
+            float scaleMultiplier = evolved ? 1.2f : 1f;
 
             if (useObjectPooling)
             {
@@ -122,7 +125,7 @@ namespace SurvivorGame.Weapons
                 if (_projectilePool != null)
                 {
                     Projectile pooled = _projectilePool.Get(transform.position, Quaternion.identity);
-                    pooled.Initialize(direction, speed, damage, projectileLifetime, _projectilePool.ReleaseCallback, pierceCount, tintColor, this);
+                    pooled.Initialize(direction, speed, damage, projectileLifetime, _projectilePool.ReleaseCallback, pierceCount, tintColor, this, overrideSprite, scaleMultiplier, evolved);
                     return;
                 }
             }
@@ -130,7 +133,7 @@ namespace SurvivorGame.Weapons
             GameObject obj = Instantiate(weaponData.ProjectilePrefab, transform.position, Quaternion.identity);
             if (obj.TryGetComponent<Projectile>(out Projectile projectile))
             {
-                projectile.Initialize(direction, speed, damage, projectileLifetime, null, pierceCount, tintColor, this);
+                projectile.Initialize(direction, speed, damage, projectileLifetime, null, pierceCount, tintColor, this, overrideSprite, scaleMultiplier, evolved);
             }
         }
 

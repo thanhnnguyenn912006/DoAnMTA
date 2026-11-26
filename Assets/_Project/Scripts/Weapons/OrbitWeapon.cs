@@ -64,6 +64,11 @@ namespace SurvivorGame.Weapons
             float angularSpeed = stats.projectileSpeed;
 
             _currentAngle = (_currentAngle + angularSpeed * Time.deltaTime) % 360f;
+            PositionActiveOrbs(activeCount, radius);
+        }
+
+        private void PositionActiveOrbs(int activeCount, float radius)
+        {
             float angleStep = 360f / activeCount;
 
             for (int i = 0; i < activeCount && i < _orbs.Count; i++)
@@ -86,6 +91,7 @@ namespace SurvivorGame.Weapons
 
             WeaponLevelStats stats = CurrentStats;
             int targetCount = Mathf.Max(1, stats.projectileCount);
+            float radius = Mathf.Max(0.5f, stats.range);
             int damage = GetEffectiveDamage();
             float hitCooldown = Mathf.Max(0.15f, GetEffectiveCooldown());
 
@@ -100,19 +106,22 @@ namespace SurvivorGame.Weapons
                 _orbs.Add(orb);
             }
 
-            Color? evolvedTint = IsEvolved ? weaponData.EvolvedTintColor : (Color?)null;
-            float scaleMultiplier = IsEvolved ? 1.2f : 1f;
+            bool evolved = IsEvolved;
+            Color? evolvedTint = evolved ? weaponData.EvolvedTintColor : (Color?)null;
+            Sprite evolvedSprite = evolved ? weaponData.EvolvedVisualSprite : null;
+            float scaleMultiplier = evolved ? 1.25f : 1f;
+            float selfSpinSpeed = evolved ? -900f : 0f;
 
-            // Bật đủ số lượng và cấu hình lại sát thương/hồi chiêu/ngoại hình cho từng quả cầu
+            // Bật đủ số lượng trước rồi đặt ngay đúng vị trí quỹ đạo để TrailRenderer không kéo vệt từ tâm (0,0)
             for (int i = 0; i < _orbs.Count; i++)
             {
-                bool shouldBeActive = i < targetCount;
-                _orbs[i].gameObject.SetActive(shouldBeActive);
+                _orbs[i].gameObject.SetActive(i < targetCount);
+            }
+            PositionActiveOrbs(targetCount, radius);
 
-                if (shouldBeActive)
-                {
-                    _orbs[i].Configure(damage, hitCooldown, enemyLayer, evolvedTint, scaleMultiplier, this);
-                }
+            for (int i = 0; i < targetCount && i < _orbs.Count; i++)
+            {
+                _orbs[i].Configure(damage, hitCooldown, enemyLayer, evolvedTint, scaleMultiplier, this, evolvedSprite, selfSpinSpeed, evolved);
             }
         }
 

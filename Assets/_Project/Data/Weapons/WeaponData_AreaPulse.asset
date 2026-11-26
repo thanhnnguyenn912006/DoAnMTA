@@ -52,7 +52,8 @@ MonoBehaviour:
   evolutionCatalyst: {fileID: 11400000, guid: 7df58e658d953cc418886a39e2ad8c9e, type: 2}
   evolvedWeaponName: "Xung Ch\u1EA5n \u0110\u1EA9y L\xF9i"
   evolvedIcon: {fileID: 1752463944517395291, guid: 3f07f77a8b5b4d74484a2c0a2099c3cc, type: 3}
-  evolvedDescription: "Ti\u1EBFn h\xF3a: S\xF3ng xung k\xEDch c\u1EF1c r\u1ED9ng, h\u1ED3i nhanh v\xE0 \u0111\u1EA9y l\xF9i qu\xE1i th\u01B0\u1EDDng"
+  evolvedVisualSprite: {fileID: 21300000, guid: 32146bb617d0f7c4bb703276747bbd8a, type: 3}
+  evolvedDescription: "Ti\u1EBFn h\xF3a: S\xF3ng \u0111\u1ECBa ch\u1EA5n h\u01B0 kh\xF4ng k\xE9p c\u1EF1c r\u1ED9ng, h\u1ED3i nhanh v\xE0 \u0111\u1EA9y l\xF9i qu\xE1i th\u01B0\u1EDDng"
   evolvedStats:
     damage: 68
     cooldown: 1.05
@@ -60,6 +61,6 @@ MonoBehaviour:
     projectileSpeed: 0
     projectileCount: 1
     upgradeDescription: "Xung Ch\u1EA5n \u0110\u1EA9y L\xF9i"
-  evolvedTintColor: {r: 0.9607843, g: 0.61960787, b: 0.043137256, a: 1}
+  evolvedTintColor: {r: 0.7529412, g: 0.5176471, b: 0.9882353, a: 1}
   evolvedProjectilePierce: 0
   evolvedKnockbackForce: 5.5

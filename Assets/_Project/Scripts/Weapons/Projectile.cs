@@ -14,9 +14,16 @@ namespace SurvivorGame.Weapons
         [Header("Cấu hình mặc định")]
         [SerializeField] private float defaultLifetime = 3f;
 
+        private static Material s_sharedTrailMaterial;
+        private static Gradient s_evolvedTrailGradient;
+
         private Rigidbody2D _rb;
         private SpriteRenderer _spriteRenderer;
+        private TrailRenderer _trailRenderer;
+        private Sprite _defaultSprite;
         private Color _defaultColor = Color.white;
+        private Vector3 _defaultScale = Vector3.one;
+        private bool _hasCachedVisualDefaults;
         private int _damage;
         private float _lifeTimer;
         private bool _hasHit;
@@ -28,11 +35,30 @@ namespace SurvivorGame.Weapons
 
         private void Awake()
         {
+            CacheVisualDefaultsIfNeeded();
+        }
+
+        private void CacheVisualDefaultsIfNeeded()
+        {
+            if (_hasCachedVisualDefaults) return;
+
             _rb = GetComponent<Rigidbody2D>();
             _spriteRenderer = GetComponent<SpriteRenderer>();
             if (_spriteRenderer != null)
             {
+                _defaultSprite = _spriteRenderer.sprite;
                 _defaultColor = _spriteRenderer.color;
+            }
+            _defaultScale = transform.localScale;
+            _hasCachedVisualDefaults = true;
+        }
+
+        private void OnDisable()
+        {
+            if (_trailRenderer != null)
+            {
+                _trailRenderer.emitting = false;
+                _trailRenderer.Clear();
             }
         }
 
@@ -46,7 +72,7 @@ namespace SurvivorGame.Weapons
         }
 
         /// <summary>
-        /// Khởi chạy viên đạn với hướng bay, tốc độ, sát thương, số mục tiêu xuyên và màu sắc tùy chọn.
+        /// Khởi chạy viên đạn với hướng bay, tốc độ, sát thương, số mục tiêu xuyên và hiệu ứng tiến hóa tùy chọn.
         /// </summary>
         public void Initialize(
             Vector2 direction,
@@ -56,8 +82,13 @@ namespace SurvivorGame.Weapons
             Action<Projectile> returnToPoolCallback = null,
             int pierceCount = 0,
             Color? tintColor = null,
-            WeaponBase sourceWeapon = null)
+            WeaponBase sourceWeapon = null,
+            Sprite overrideSprite = null,
+            float scaleMultiplier = 1f,
+            bool enableTrail = false)
         {
+            CacheVisualDefaultsIfNeeded();
+
             Vector2 dir = direction.sqrMagnitude > 0.0001f ? direction.normalized : Vector2.right;
 
             _damage = damage;
@@ -70,14 +101,115 @@ namespace SurvivorGame.Weapons
 
             if (_spriteRenderer != null)
             {
-                _spriteRenderer.color = tintColor.HasValue ? tintColor.Value : _defaultColor;
+                if (overrideSprite != null)
+                {
+                    _spriteRenderer.sprite = overrideSprite;
+                    _spriteRenderer.color = Color.white;
+                }
+                else
+                {
+                    _spriteRenderer.sprite = _defaultSprite;
+                    _spriteRenderer.color = tintColor.HasValue ? tintColor.Value : _defaultColor;
+                }
             }
+
+            transform.localScale = _defaultScale * Mathf.Max(0.1f, scaleMultiplier);
 
             // Xoay đầu viên đạn theo đúng hướng bay
             float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
             transform.rotation = Quaternion.Euler(0f, 0f, angle);
 
-            _rb.linearVelocity = dir * speed;
+            ConfigureTrail(enableTrail);
+
+            if (_rb != null)
+            {
+                _rb.linearVelocity = dir * speed;
+            }
+        }
+
+        private void ConfigureTrail(bool enableTrail)
+        {
+            if (!enableTrail)
+            {
+                if (_trailRenderer != null)
+                {
+                    _trailRenderer.emitting = false;
+                    _trailRenderer.Clear();
+                }
+                return;
+            }
+
+            if (_trailRenderer == null)
+            {
+                _trailRenderer = GetComponent<TrailRenderer>();
+                if (_trailRenderer == null)
+                {
+                    _trailRenderer = gameObject.AddComponent<TrailRenderer>();
+                }
+
+                _trailRenderer.time = 0.14f;
+                _trailRenderer.minVertexDistance = 0.05f;
+                _trailRenderer.startWidth = 0.24f;
+                _trailRenderer.endWidth = 0.02f;
+                _trailRenderer.numCapVertices = 2;
+                _trailRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                _trailRenderer.receiveShadows = false;
+                _trailRenderer.colorGradient = GetEvolvedTrailGradient();
+
+                Material trailMat = GetSharedTrailMaterial();
+                if (trailMat != null)
+                {
+                    _trailRenderer.sharedMaterial = trailMat;
+                }
+
+                if (_spriteRenderer != null)
+                {
+                    _trailRenderer.sortingLayerID = _spriteRenderer.sortingLayerID;
+                    _trailRenderer.sortingOrder = _spriteRenderer.sortingOrder - 1;
+                }
+            }
+
+            _trailRenderer.Clear();
+            _trailRenderer.emitting = true;
+        }
+
+        private Material GetSharedTrailMaterial()
+        {
+            if (s_sharedTrailMaterial == null)
+            {
+                Shader shader = Shader.Find("Universal Render Pipeline/2D/Sprite-Unlit-Default");
+                if (shader == null) shader = Shader.Find("Sprites/Default");
+                if (shader != null)
+                {
+                    s_sharedTrailMaterial = new Material(shader)
+                    {
+                        hideFlags = HideFlags.DontSave
+                    };
+                }
+            }
+            return s_sharedTrailMaterial != null ? s_sharedTrailMaterial : (_spriteRenderer != null ? _spriteRenderer.sharedMaterial : null);
+        }
+
+        private static Gradient GetEvolvedTrailGradient()
+        {
+            if (s_evolvedTrailGradient == null)
+            {
+                s_evolvedTrailGradient = new Gradient();
+                s_evolvedTrailGradient.SetKeys(
+                    new[]
+                    {
+                        new GradientColorKey(new Color(0.92f, 1f, 1f), 0f),
+                        new GradientColorKey(new Color(0f, 0.94f, 1f), 0.35f),
+                        new GradientColorKey(new Color(0.15f, 0.39f, 0.92f), 1f)
+                    },
+                    new[]
+                    {
+                        new GradientAlphaKey(0.95f, 0f),
+                        new GradientAlphaKey(0.65f, 0.45f),
+                        new GradientAlphaKey(0f, 1f)
+                    });
+            }
+            return s_evolvedTrailGradient;
         }
 
         private void OnTriggerEnter2D(Collider2D other)
@@ -135,7 +267,15 @@ namespace SurvivorGame.Weapons
         /// </summary>
         private void Despawn()
         {
-            _rb.linearVelocity = Vector2.zero;
+            if (_rb != null)
+            {
+                _rb.linearVelocity = Vector2.zero;
+            }
+            if (_trailRenderer != null)
+            {
+                _trailRenderer.emitting = false;
+                _trailRenderer.Clear();
+            }
             _sourceWeapon = null;
             ClearHitTargets();
 

@@ -44,6 +44,7 @@ namespace SurvivorGame.Data
         [SerializeField] private PassiveUpgradeData evolutionCatalyst;
         [SerializeField] private string evolvedWeaponName;
         [SerializeField] private Sprite evolvedIcon;
+        [SerializeField] private Sprite evolvedVisualSprite;
         [SerializeField, TextArea(1, 2)] private string evolvedDescription;
         [SerializeField] private WeaponLevelStats evolvedStats;
         [SerializeField] private Color evolvedTintColor = new Color(1f, 0.78f, 0.18f, 1f);
@@ -61,6 +62,7 @@ namespace SurvivorGame.Data
         public PassiveUpgradeData EvolutionCatalyst => evolutionCatalyst;
         public string EvolvedWeaponName => string.IsNullOrEmpty(evolvedWeaponName) ? weaponName : evolvedWeaponName;
         public Sprite EvolvedIcon => evolvedIcon != null ? evolvedIcon : icon;
+        public Sprite EvolvedVisualSprite => evolvedVisualSprite;
         public string EvolvedDescription => evolvedDescription;
         public WeaponLevelStats EvolvedStats => evolvedStats;
         public Color EvolvedTintColor => evolvedTintColor;

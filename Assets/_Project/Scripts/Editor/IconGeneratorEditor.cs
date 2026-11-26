@@ -231,20 +231,20 @@ namespace SurvivorGame.EditorTools
             return tex;
         }
 
-        // 9. [TIẾN HÓA] Liên Thanh Xuyên Thấu: Tâm ngắm vàng kim + 3 tia đạn xuyên phá rực sáng
+        // 9. [TIẾN HÓA] Liên Thanh Xuyên Thấu: Khung vàng EVO + 3 tia plasma điện quang xanh lam-cyan
         private static Texture2D DrawAutoGunEvo()
         {
             Color goldBorder = new Color(0.98f, 0.80f, 0.08f, 1f);
-            Color warmInner = new Color(1f, 0.93f, 0.55f, 0.7f);
-            var tex = CreateBlankWithBorder(new Color(0.18f, 0.10f, 0.03f, 1f), goldBorder, warmInner);
+            Color cyanInner = new Color(0.45f, 0.94f, 1f, 0.8f);
+            var tex = CreateBlankWithBorder(new Color(0.03f, 0.10f, 0.22f, 1f), goldBorder, cyanInner);
 
-            Color ringAmber = new Color(0.92f, 0.52f, 0.06f, 0.9f);
-            Color auraOrange = new Color(1f, 0.48f, 0.08f, 1f);
-            Color beamGold = new Color(1f, 0.86f, 0.22f, 1f);
+            Color ringBlue = new Color(0.15f, 0.45f, 0.96f, 0.92f);
+            Color auraBlue = new Color(0.08f, 0.56f, 1f, 1f);
+            Color beamCyan = new Color(0.00f, 0.94f, 1f, 1f);
 
-            DrawCircle(tex, 32, 32, 21, ringAmber, true, 3.5f);
-            DrawCircle(tex, 32, 32, 12, goldBorder, true, 2f);
-            DrawRect(tex, 31, 9, 2, 46, ringAmber);
+            DrawCircle(tex, 32, 32, 21, ringBlue, true, 3.5f);
+            DrawCircle(tex, 32, 32, 12, beamCyan, true, 2f);
+            DrawRect(tex, 31, 9, 2, 46, ringBlue);
 
             // 3 tia đạn xuyên phá song song với đầu mũi tên sắc nhọn
             int[] ys = { 18, 32, 46 };
@@ -254,15 +254,15 @@ namespace SurvivorGame.EditorTools
             {
                 int cy = ys[i];
                 int len = xEnds[i] - xStarts[i];
-                DrawRect(tex, xStarts[i], cy - 3, len, 7, auraOrange);
-                DrawRect(tex, xStarts[i] + 1, cy - 2, len - 1, 5, beamGold);
+                DrawRect(tex, xStarts[i], cy - 3, len, 7, auraBlue);
+                DrawRect(tex, xStarts[i] + 1, cy - 2, len - 1, 5, beamCyan);
                 DrawRect(tex, xStarts[i] + 3, cy - 1, len - 3, 2, Color.white);
 
                 // Đầu mũi xuyên phía phải
                 for (int dx = 0; dx <= 5; dx++)
                 {
                     int halfH = 5 - dx;
-                    DrawRect(tex, xEnds[i] - 1 + dx, cy - halfH, 1, halfH * 2 + 1, dx < 3 ? beamGold : Color.white);
+                    DrawRect(tex, xEnds[i] - 1 + dx, cy - halfH, 1, halfH * 2 + 1, dx < 3 ? beamCyan : Color.white);
                 }
             }
 
@@ -304,19 +304,19 @@ namespace SurvivorGame.EditorTools
             return tex;
         }
 
-        // 11. [TIẾN HÓA] Xung Chấn Đẩy Lùi: 3 vòng sóng vàng-cam dày + 4 mũi tên xung chấn hướng ra ngoài
+        // 11. [TIẾN HÓA] Xung Chấn Đẩy Lùi: Khung vàng EVO + 3 vòng sóng tím-hồng hư không + 4 mũi tên đẩy lùi
         private static Texture2D DrawAreaPulseEvo()
         {
             Color goldBorder = new Color(0.98f, 0.80f, 0.08f, 1f);
-            Color warmInner = new Color(1f, 0.92f, 0.50f, 0.7f);
-            var tex = CreateBlankWithBorder(new Color(0.18f, 0.08f, 0.02f, 1f), goldBorder, warmInner);
+            Color violetInner = new Color(0.88f, 0.56f, 1f, 0.8f);
+            var tex = CreateBlankWithBorder(new Color(0.14f, 0.04f, 0.22f, 1f), goldBorder, violetInner);
 
-            Color outerFlame = new Color(0.96f, 0.42f, 0.08f, 1f);
-            Color midGold = new Color(1f, 0.78f, 0.16f, 1f);
-            Color innerBright = new Color(1f, 0.94f, 0.55f, 1f);
+            Color outerVoid = new Color(0.58f, 0.16f, 0.90f, 1f);
+            Color midMagenta = new Color(0.86f, 0.28f, 0.94f, 1f);
+            Color innerBright = new Color(0.95f, 0.72f, 1f, 1f);
 
-            DrawCircle(tex, 32, 32, 23, outerFlame, true, 4f);
-            DrawCircle(tex, 32, 32, 16, midGold, true, 3.5f);
+            DrawCircle(tex, 32, 32, 23, outerVoid, true, 4f);
+            DrawCircle(tex, 32, 32, 16, midMagenta, true, 3.5f);
             DrawCircle(tex, 32, 32, 9.5f, innerBright, true, 3f);
             DrawCircle(tex, 32, 32, 4.5f, Color.white);
 

@@ -700,5 +700,70 @@ namespace SurvivorGame.Tests.EditMode
                 Object.DestroyImmediate(go);
             }
         }
+
+        [Test]
+        public void EvolvedWeaponVisuals_SwapSpriteScaleTrailAndRestoreCleanlyOnPoolReuse()
+        {
+            GameObject projObj = new GameObject("ProjectileVfxTest");
+            GameObject orbObj = new GameObject("OrbitOrbVfxTest");
+            Texture2D tex = new Texture2D(4, 4);
+            Sprite baseSprite = Sprite.Create(tex, new Rect(0, 0, 4, 4), new Vector2(0.5f, 0.5f));
+            Sprite evoSprite = Sprite.Create(tex, new Rect(0, 0, 4, 4), new Vector2(0.5f, 0.5f));
+            try
+            {
+                // 1. Projectile: dùng sprite tiến hóa với Color.white + scale + trail, rồi hoàn nguyên khi tái sử dụng thường
+                SpriteRenderer projSr = projObj.AddComponent<SpriteRenderer>();
+                projSr.sprite = baseSprite;
+                projSr.color = Color.cyan;
+                projObj.AddComponent<Rigidbody2D>();
+                projObj.AddComponent<CircleCollider2D>();
+                Projectile proj = projObj.AddComponent<Projectile>();
+                InvokeLifecycle(proj, "Awake");
+
+                proj.Initialize(Vector2.right, 10f, 50, 2f, null, 2, Color.yellow, null, evoSprite, 1.2f, true);
+                Assert.AreSame(evoSprite, projSr.sprite);
+                Assert.AreEqual(Color.white, projSr.color);
+                Assert.AreEqual(1.2f, projObj.transform.localScale.x, 0.0001f);
+                TrailRenderer projTrail = projObj.GetComponent<TrailRenderer>();
+                Assert.IsNotNull(projTrail);
+                Assert.IsTrue(projTrail.emitting);
+
+                proj.Initialize(Vector2.right, 10f, 15, 2f);
+                Assert.AreSame(baseSprite, projSr.sprite);
+                Assert.AreEqual(Color.cyan, projSr.color);
+                Assert.AreEqual(1f, projObj.transform.localScale.x, 0.0001f);
+                Assert.IsFalse(projTrail.emitting);
+
+                // 2. OrbitOrb: dùng lưỡi cưa tiến hóa + trail + xoay, rồi hoàn nguyên khi quay về trạng thái thường
+                SpriteRenderer orbSr = orbObj.AddComponent<SpriteRenderer>();
+                orbSr.sprite = baseSprite;
+                orbSr.color = Color.blue;
+                orbObj.AddComponent<CircleCollider2D>();
+                OrbitOrb orb = orbObj.AddComponent<OrbitOrb>();
+                InvokeLifecycle(orb, "Awake");
+
+                orb.Configure(50, 0.18f, ~0, Color.red, 1.25f, null, evoSprite, -900f, true);
+                Assert.AreSame(evoSprite, orbSr.sprite);
+                Assert.AreEqual(Color.white, orbSr.color);
+                Assert.AreEqual(1.25f, orbObj.transform.localScale.x, 0.0001f);
+                TrailRenderer orbTrail = orbObj.GetComponent<TrailRenderer>();
+                Assert.IsNotNull(orbTrail);
+                Assert.IsTrue(orbTrail.emitting);
+
+                orb.Configure(14, 0.4f, ~0);
+                Assert.AreSame(baseSprite, orbSr.sprite);
+                Assert.AreEqual(Color.blue, orbSr.color);
+                Assert.AreEqual(1f, orbObj.transform.localScale.x, 0.0001f);
+                Assert.IsFalse(orbTrail.emitting);
+            }
+            finally
+            {
+                Object.DestroyImmediate(projObj);
+                Object.DestroyImmediate(orbObj);
+                Object.DestroyImmediate(evoSprite);
+                Object.DestroyImmediate(baseSprite);
+                Object.DestroyImmediate(tex);
+            }
+        }
     }
 }
