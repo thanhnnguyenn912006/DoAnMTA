@@ -30,7 +30,7 @@ namespace SurvivorGame.Systems
             EnemyController.OnAnyEnemyDied += HandleEnemyDied;
 
             if (playerExperience != null) playerExperience.OnLevelUp += HandleLevelUp;
-            if (upgradeManager != null) upgradeManager.OnUpgradeMenuClosed += HandleUpgradeSelected;
+            if (upgradeManager != null) upgradeManager.OnUpgradeSelected += HandleUpgradeSelected;
 
             if (bossSpawner != null)
             {
@@ -47,7 +47,7 @@ namespace SurvivorGame.Systems
             EnemyController.OnAnyEnemyDied -= HandleEnemyDied;
 
             if (playerExperience != null) playerExperience.OnLevelUp -= HandleLevelUp;
-            if (upgradeManager != null) upgradeManager.OnUpgradeMenuClosed -= HandleUpgradeSelected;
+            if (upgradeManager != null) upgradeManager.OnUpgradeSelected -= HandleUpgradeSelected;
 
             if (bossSpawner != null)
             {
@@ -83,9 +83,16 @@ namespace SurvivorGame.Systems
             AudioManager.Instance?.PlaySfx(SoundId.LevelUp, 0.9f, 0.15f);
         }
 
-        private void HandleUpgradeSelected()
+        private void HandleUpgradeSelected(UpgradeOption option)
         {
-            AudioManager.Instance?.PlaySfx(SoundId.UpgradeSelect, 0.85f, 0.05f);
+            if (option.IsWeaponEvolution)
+            {
+                AudioManager.Instance?.PlaySfx(SoundId.WeaponEvolve, 0.95f, 0.05f);
+            }
+            else
+            {
+                AudioManager.Instance?.PlaySfx(SoundId.UpgradeSelect, 0.85f, 0.05f);
+            }
         }
 
         private void HandleBossSpawned(EnemyController boss, Health bossHealth)

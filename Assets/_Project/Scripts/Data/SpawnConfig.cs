@@ -69,6 +69,15 @@ namespace SurvivorGame.Data
         /// </summary>
         public bool TryGetPhaseForTime(float elapsedSeconds, out SpawnPhase activePhase)
         {
+            return TryGetPhaseForTime(elapsedSeconds, out _, out activePhase);
+        }
+
+        /// <summary>
+        /// Tìm giai đoạn hiện tại và trả về kèm chỉ số giai đoạn (phaseIndex).
+        /// </summary>
+        public bool TryGetPhaseForTime(float elapsedSeconds, out int phaseIndex, out SpawnPhase activePhase)
+        {
+            phaseIndex = -1;
             activePhase = default;
             if (phases == null || phases.Length == 0) return false;
 
@@ -84,6 +93,7 @@ namespace SurvivorGame.Data
                 }
             }
 
+            phaseIndex = bestIndex;
             activePhase = phases[bestIndex];
             return true;
         }

@@ -1,12 +1,13 @@
 ﻿using System;
 using UnityEngine;
 using SurvivorGame.Data;
+using SurvivorGame.Player;
 
 namespace SurvivorGame.Weapons
 {
     /// <summary>
     /// Lớp cơ sở trừu tượng cho mọi loại vũ khí tự động.
-    /// Quản lý cấp độ, vòng lặp hồi chiêu, hệ số bị động và sự kiện.
+    /// Quản lý cấp độ, vòng lặp hồi chiêu, hệ số bị động, tiến hóa và sự kiện.
     /// </summary>
     public abstract class WeaponBase : MonoBehaviour
     {
@@ -17,6 +18,7 @@ namespace SurvivorGame.Weapons
         protected float _cooldownTimer;
         protected float _damageMultiplier = 1f;
         protected float _cooldownMultiplier = 1f;
+        protected bool _isEvolved;
 
         // Thời gian chờ ngắn khi không tìm thấy mục tiêu để tránh quét vật lý mỗi frame
         private const float RetryDelayWhenNoTarget = 0.1f;
@@ -25,7 +27,8 @@ namespace SurvivorGame.Weapons
         public int CurrentLevel => currentLevel;
         public int MaxLevel => weaponData != null ? weaponData.MaxLevel : 1;
         public bool IsMaxLevel => currentLevel >= MaxLevel;
-        public WeaponLevelStats CurrentStats => weaponData.GetStats(currentLevel);
+        public bool IsEvolved => _isEvolved;
+        public WeaponLevelStats CurrentStats => _isEvolved ? weaponData.EvolvedStats : weaponData.GetStats(currentLevel);
 
         /// <summary>
         /// Một số vũ khí duy trì liên tục (như Vật xoay) không dùng nhịp hồi chiêu thông thường.
@@ -71,6 +74,7 @@ namespace SurvivorGame.Weapons
         {
             weaponData = data;
             currentLevel = Mathf.Clamp(startLevel, 1, MaxLevel);
+            _isEvolved = false;
             _cooldownTimer = 0f;
             OnStatsUpdated();
             OnLevelChanged?.Invoke(this, currentLevel);
@@ -84,6 +88,42 @@ namespace SurvivorGame.Weapons
             if (weaponData == null || IsMaxLevel) return false;
 
             currentLevel++;
+            OnStatsUpdated();
+            OnLevelChanged?.Invoke(this, currentLevel);
+            return true;
+        }
+
+        /// <summary>
+        /// Kiểm tra điều kiện mở khóa tiến hóa: đạt Cấp tối đa, chưa tiến hóa và có bị động xúc tác >= Cấp 1.
+        /// </summary>
+        public bool CanEvolve(PlayerStats stats)
+        {
+            if (_isEvolved || weaponData == null || !weaponData.HasEvolution || !IsMaxLevel)
+            {
+                return false;
+            }
+
+            PassiveUpgradeData catalyst = weaponData.EvolutionCatalyst;
+            if (catalyst == null || stats == null)
+            {
+                return false;
+            }
+
+            return stats.GetPassiveLevel(catalyst) >= 1;
+        }
+
+        /// <summary>
+        /// Kích hoạt trạng thái tiến hóa (tối đa 1 lần duy nhất) và áp dụng ngay bộ chỉ số tiến hóa.
+        /// </summary>
+        public virtual bool Evolve()
+        {
+            if (_isEvolved || weaponData == null || !weaponData.HasEvolution || !IsMaxLevel)
+            {
+                return false;
+            }
+
+            _isEvolved = true;
+            _cooldownTimer = Mathf.Min(_cooldownTimer, GetEffectiveCooldown());
             OnStatsUpdated();
             OnLevelChanged?.Invoke(this, currentLevel);
             return true;

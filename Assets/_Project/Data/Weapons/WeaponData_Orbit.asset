@@ -48,3 +48,17 @@ MonoBehaviour:
     projectileSpeed: 280
     projectileCount: 5
     upgradeDescription: "5 c\u1EA7u n\u0103ng l\u01B0\u1EE3ng xoay c\u1EF1c nhanh qu\xE9t s\u1EA1ch k\u1EBB th\xF9"
+  hasEvolution: 1
+  evolutionCatalyst: {fileID: 11400000, guid: db0e8c4b32700fa4591c6d4b94ddb43d, type: 2}
+  evolvedWeaponName: "V\xF2ng L\u01B0\u1EE1i C\u01B0a H\u1ECFa L\u1EF1c"
+  evolvedDescription: "Ti\u1EBFn h\xF3a: 6 c\u1EA7u l\u1EEDa c\u1EE1 l\u1EDBn xoay c\u1EF1c nhanh v\u1EDBi b\xE1n k\xEDnh r\u1ED9ng h\u01A1n"
+  evolvedStats:
+    damage: 50
+    cooldown: 0.18
+    range: 3
+    projectileSpeed: 400
+    projectileCount: 6
+    upgradeDescription: "V\xF2ng L\u01B0\u1EE1i C\u01B0a H\u1ECFa L\u1EF1c"
+  evolvedTintColor: {r: 1, g: 0.41960785, b: 0.16862746, a: 1}
+  evolvedProjectilePierce: 0
+  evolvedKnockbackForce: 0

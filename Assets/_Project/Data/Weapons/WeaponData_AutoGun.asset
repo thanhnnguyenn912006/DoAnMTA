@@ -48,3 +48,17 @@ MonoBehaviour:
     projectileSpeed: 16
     projectileCount: 3
     upgradeDescription: "B\u1EAFn 3 vi\xEAn \u0111\u1EA1n t\u1ED1c \u0111\u1ED9 c\u1EF1c nhanh"
+  hasEvolution: 1
+  evolutionCatalyst: {fileID: 11400000, guid: de06b4e6666ab34488e4e2d26c4e75ad, type: 2}
+  evolvedWeaponName: "Li\xEAn Thanh Xuy\xEAn Th\u1EA5u"
+  evolvedDescription: "Ti\u1EBFn h\xF3a: B\u1EAFn 3 vi\xEAn si\xEAu nhanh, s\xE1t th\u01B0\u01A1ng cao v\xE0 xuy\xEAn qua t\u1ED1i \u0111a 2 qu\xE1i"
+  evolvedStats:
+    damage: 55
+    cooldown: 0.3
+    range: 10
+    projectileSpeed: 19
+    projectileCount: 3
+    upgradeDescription: "Li\xEAn Thanh Xuy\xEAn Th\u1EA5u"
+  evolvedTintColor: {r: 0.98039216, g: 0.8, b: 0.08235294, a: 1}
+  evolvedProjectilePierce: 2
+  evolvedKnockbackForce: 0

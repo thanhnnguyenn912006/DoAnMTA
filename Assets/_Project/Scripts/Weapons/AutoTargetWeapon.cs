@@ -113,13 +113,16 @@ namespace SurvivorGame.Weapons
         /// </summary>
         protected virtual void SpawnProjectile(Vector2 direction, float speed, int damage)
         {
+            int pierceCount = IsEvolved && weaponData != null ? weaponData.EvolvedProjectilePierce : 0;
+            Color? tintColor = IsEvolved && weaponData != null ? weaponData.EvolvedTintColor : (Color?)null;
+
             if (useObjectPooling)
             {
                 EnsurePoolReady();
                 if (_projectilePool != null)
                 {
                     Projectile pooled = _projectilePool.Get(transform.position, Quaternion.identity);
-                    pooled.Initialize(direction, speed, damage, projectileLifetime, _projectilePool.ReleaseCallback);
+                    pooled.Initialize(direction, speed, damage, projectileLifetime, _projectilePool.ReleaseCallback, pierceCount, tintColor);
                     return;
                 }
             }
@@ -127,7 +130,7 @@ namespace SurvivorGame.Weapons
             GameObject obj = Instantiate(weaponData.ProjectilePrefab, transform.position, Quaternion.identity);
             if (obj.TryGetComponent<Projectile>(out Projectile projectile))
             {
-                projectile.Initialize(direction, speed, damage, projectileLifetime, null);
+                projectile.Initialize(direction, speed, damage, projectileLifetime, null, pierceCount, tintColor);
             }
         }
 

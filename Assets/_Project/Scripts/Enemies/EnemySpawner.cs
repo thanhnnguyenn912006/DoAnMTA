@@ -32,6 +32,7 @@ namespace SurvivorGame.Enemies
 
         private float _spawnTimer;
         private float _relocateTimer;
+        private int _lastAnnouncedPhaseIndex;
         private ComponentPool<EnemyController> _defaultEnemyPool;
         private readonly List<EnemyController> _activeEnemies = new List<EnemyController>(160);
 
@@ -39,6 +40,9 @@ namespace SurvivorGame.Enemies
         public int ActiveEnemyCount => activeEnemyCount;
         public int MaxActiveEnemies => spawnConfig != null ? spawnConfig.MaxActiveEnemies : 150;
         public Transform PlayerTransform => playerTransform;
+
+        // Sự kiện phát khi chuyển sang giai đoạn sinh quái mới (phaseIndex, phaseName)
+        public event System.Action<int, string> OnPhaseChanged;
 
         private void Awake()
         {
@@ -92,12 +96,18 @@ namespace SurvivorGame.Enemies
             elapsedTime += Time.deltaTime;
             _spawnTimer -= Time.deltaTime;
 
-            if (_spawnTimer > 0f) return;
-
-            if (!spawnConfig.TryGetPhaseForTime(elapsedTime, out SpawnPhase currentPhase))
+            if (!spawnConfig.TryGetPhaseForTime(elapsedTime, out int phaseIndex, out SpawnPhase currentPhase))
             {
                 return;
             }
+
+            if (phaseIndex > _lastAnnouncedPhaseIndex)
+            {
+                _lastAnnouncedPhaseIndex = phaseIndex;
+                OnPhaseChanged?.Invoke(phaseIndex, currentPhase.phaseName);
+            }
+
+            if (_spawnTimer > 0f) return;
 
             _spawnTimer = currentPhase.spawnInterval;
             SpawnBatch(currentPhase);

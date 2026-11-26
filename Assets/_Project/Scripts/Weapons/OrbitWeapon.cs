@@ -100,7 +100,10 @@ namespace SurvivorGame.Weapons
                 _orbs.Add(orb);
             }
 
-            // Bật đủ số lượng và cấu hình lại sát thương/hồi chiêu cho từng quả cầu
+            Color? evolvedTint = IsEvolved ? weaponData.EvolvedTintColor : (Color?)null;
+            float scaleMultiplier = IsEvolved ? 1.2f : 1f;
+
+            // Bật đủ số lượng và cấu hình lại sát thương/hồi chiêu/ngoại hình cho từng quả cầu
             for (int i = 0; i < _orbs.Count; i++)
             {
                 bool shouldBeActive = i < targetCount;
@@ -108,7 +111,7 @@ namespace SurvivorGame.Weapons
 
                 if (shouldBeActive)
                 {
-                    _orbs[i].Configure(damage, hitCooldown, enemyLayer);
+                    _orbs[i].Configure(damage, hitCooldown, enemyLayer, evolvedTint, scaleMultiplier);
                 }
             }
         }

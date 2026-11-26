@@ -14,15 +14,50 @@ namespace SurvivorGame.Weapons
         private int _damage = 10;
         private float _hitCooldown = 0.35f;
         private LayerMask _enemyLayer;
+        private SpriteRenderer _spriteRenderer;
+        private Color _defaultColor = Color.white;
+        private Vector3 _defaultScale = Vector3.one;
+        private bool _hasCachedVisualDefaults;
 
         // Lưu thời điểm gây sát thương gần nhất lên từng quái (tối đa ~150 quái từ Pool)
         private readonly Dictionary<Health, float> _lastHitTimes = new Dictionary<Health, float>();
 
-        public void Configure(int damage, float hitCooldown, LayerMask enemyLayer)
+        private void Awake()
         {
+            CacheVisualDefaultsIfNeeded();
+        }
+
+        private void CacheVisualDefaultsIfNeeded()
+        {
+            if (_hasCachedVisualDefaults) return;
+
+            _spriteRenderer = GetComponent<SpriteRenderer>();
+            if (_spriteRenderer != null)
+            {
+                _defaultColor = _spriteRenderer.color;
+            }
+            _defaultScale = transform.localScale;
+            _hasCachedVisualDefaults = true;
+        }
+
+        public void Configure(
+            int damage,
+            float hitCooldown,
+            LayerMask enemyLayer,
+            Color? tintColor = null,
+            float scaleMultiplier = 1f)
+        {
+            CacheVisualDefaultsIfNeeded();
+
             _damage = Mathf.Max(1, damage);
             _hitCooldown = Mathf.Max(0.05f, hitCooldown);
             _enemyLayer = enemyLayer;
+
+            if (_spriteRenderer != null)
+            {
+                _spriteRenderer.color = tintColor.HasValue ? tintColor.Value : _defaultColor;
+            }
+            transform.localScale = _defaultScale * Mathf.Max(0.1f, scaleMultiplier);
         }
 
         private void OnDisable()

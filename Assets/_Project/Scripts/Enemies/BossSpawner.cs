@@ -19,6 +19,7 @@ namespace SurvivorGame.Enemies
 
         [Header("Lịch xuất hiện Boss")]
         [SerializeField, Min(5f)] private float firstBossTime = 150f;
+        [SerializeField, Min(0f)] private float bossWarningLeadTime = 10f;
 
         [Header("Chế độ Vô tận (mặc định tắt vì hạ Boss đợt 1 là Chiến thắng)")]
         [SerializeField, Tooltip("Bật nếu muốn triệu hồi thêm Boss lặp lại sau khi hạ Boss đầu tiên.")]
@@ -40,10 +41,12 @@ namespace SurvivorGame.Enemies
         private Transform _cachedPlayerTransform;
         private float _nextBossTime;
         private float _relocateTimer;
+        private bool _warningSentForCurrentEncounter;
 
         public bool HasActiveBoss => hasActiveBoss;
         public EnemyController ActiveBoss => _activeBoss;
 
+        public event Action<string> OnBossWarning;
         public event Action<EnemyController, Health> OnBossSpawned;
         public event Action<EnemyController> OnBossDefeated;
 
@@ -89,6 +92,16 @@ namespace SurvivorGame.Enemies
             if (enemySpawner.ElapsedTime >= _nextBossTime)
             {
                 SpawnBoss();
+                return;
+            }
+
+            if (!_warningSentForCurrentEncounter &&
+                bossWarningLeadTime > 0f &&
+                enemySpawner.ElapsedTime >= _nextBossTime - bossWarningLeadTime)
+            {
+                _warningSentForCurrentEncounter = true;
+                AudioManager.Instance?.PlaySfx(SoundId.BossWarning, 0.95f, 0.5f);
+                OnBossWarning?.Invoke("CẢNH BÁO: BOSS SẮP XUẤT HIỆN!");
             }
         }
 
@@ -158,10 +171,12 @@ namespace SurvivorGame.Enemies
             _activeBoss = boss;
             hasActiveBoss = true;
             bossesSpawnedCount++;
+            _warningSentForCurrentEncounter = true;
 
             if (enableEndlessRepeat && enemySpawner != null)
             {
                 _nextBossTime = enemySpawner.ElapsedTime + repeatInterval;
+                _warningSentForCurrentEncounter = false;
             }
 
             Health bossHealth = boss.GetComponent<Health>();

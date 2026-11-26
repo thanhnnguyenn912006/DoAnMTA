@@ -39,12 +39,31 @@ namespace SurvivorGame.Data
         [Header("Chỉ số theo từng cấp (Tối đa 5 cấp)")]
         [SerializeField] private WeaponLevelStats[] levels = new WeaponLevelStats[5];
 
+        [Header("Tiến hóa Vũ khí (Cấp tối đa + Bị động >= Cấp 1)")]
+        [SerializeField] private bool hasEvolution;
+        [SerializeField] private PassiveUpgradeData evolutionCatalyst;
+        [SerializeField] private string evolvedWeaponName;
+        [SerializeField, TextArea(1, 2)] private string evolvedDescription;
+        [SerializeField] private WeaponLevelStats evolvedStats;
+        [SerializeField] private Color evolvedTintColor = new Color(1f, 0.78f, 0.18f, 1f);
+        [SerializeField, Min(0)] private int evolvedProjectilePierce = 0;
+        [SerializeField, Min(0f)] private float evolvedKnockbackForce = 0f;
+
         public string WeaponId => weaponId;
         public string WeaponName => weaponName;
         public WeaponType Type => weaponType;
         public Sprite Icon => icon;
         public GameObject ProjectilePrefab => projectilePrefab;
         public int MaxLevel => levels != null ? levels.Length : 0;
+
+        public bool HasEvolution => hasEvolution;
+        public PassiveUpgradeData EvolutionCatalyst => evolutionCatalyst;
+        public string EvolvedWeaponName => string.IsNullOrEmpty(evolvedWeaponName) ? weaponName : evolvedWeaponName;
+        public string EvolvedDescription => evolvedDescription;
+        public WeaponLevelStats EvolvedStats => evolvedStats;
+        public Color EvolvedTintColor => evolvedTintColor;
+        public int EvolvedProjectilePierce => evolvedProjectilePierce;
+        public float EvolvedKnockbackForce => evolvedKnockbackForce;
 
         /// <summary>
         /// Lấy bộ chỉ số tương ứng với cấp độ hiện tại (tính từ 1 đến MaxLevel).

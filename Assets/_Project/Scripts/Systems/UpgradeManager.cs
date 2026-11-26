@@ -14,6 +14,7 @@ namespace SurvivorGame.Systems
     {
         public bool IsWeaponUpgrade;
         public bool IsNewWeaponUnlock;
+        public bool IsWeaponEvolution;
         public WeaponBase TargetWeapon;
         public PassiveUpgradeData PassiveData;
 
@@ -47,8 +48,9 @@ namespace SurvivorGame.Systems
 
         public bool IsChoosingUpgrade => _isChoosingUpgrade;
 
-        // Sự kiện phát sang UpgradePanelUI
+        // Sự kiện phát sang UpgradePanelUI, WeaponBarHUD và GameplayAudioBridge
         public event Action<IReadOnlyList<UpgradeOption>> OnUpgradeChoicesReady;
+        public event Action<UpgradeOption> OnUpgradeSelected;
         public event Action OnUpgradeMenuClosed;
 
         private void Awake()
@@ -198,7 +200,14 @@ namespace SurvivorGame.Systems
 
             if (chosen.IsWeaponUpgrade && chosen.TargetWeapon != null)
             {
-                if (chosen.IsNewWeaponUnlock || !chosen.TargetWeapon.gameObject.activeSelf)
+                if (chosen.IsWeaponEvolution)
+                {
+                    chosen.TargetWeapon.Evolve();
+#if UNITY_EDITOR
+                    Debug.Log($"[UpgradeManager] Đã TIẾN HÓA vũ khí thành '{chosen.Title}'!");
+#endif
+                }
+                else if (chosen.IsNewWeaponUnlock || !chosen.TargetWeapon.gameObject.activeSelf)
                 {
                     // Mở khóa vũ khí mới ở Cấp 1 và đồng bộ ngay các chỉ số bị động đang có
                     chosen.TargetWeapon.gameObject.SetActive(true);
@@ -223,6 +232,8 @@ namespace SurvivorGame.Systems
                 playerStats.ApplyPassiveUpgrade(chosen.PassiveData);
             }
 
+            OnUpgradeSelected?.Invoke(chosen);
+
             _pendingLevelUps = Mathf.Max(0, _pendingLevelUps - 1);
 
             if (_pendingLevelUps > 0 && !IsGameEnded())
@@ -245,10 +256,13 @@ namespace SurvivorGame.Systems
         {
             _candidatePool.Clear();
 
+            WeaponBase[] weapons = weaponsContainer != null
+                ? weaponsContainer.GetComponentsInChildren<WeaponBase>(true)
+                : null;
+
             // 1. Gom toàn bộ vũ khí (bao gồm cả vũ khí đang tắt để cho phép mở khóa khi lên cấp)
-            if (weaponsContainer != null)
+            if (weapons != null)
             {
-                WeaponBase[] weapons = weaponsContainer.GetComponentsInChildren<WeaponBase>(true);
                 for (int i = 0; i < weapons.Length; i++)
                 {
                     WeaponBase weapon = weapons[i];
@@ -266,13 +280,30 @@ namespace SurvivorGame.Systems
                             TargetWeapon = weapon,
                             Title = weapon.Data.WeaponName,
                             LevelText = "VŨ KHÍ MỚI (Cấp 1)",
-                            Description = lv1Stats.upgradeDescription,
+                            Description = AppendWeaponEvolutionHint(lv1Stats.upgradeDescription, weapon.Data),
                             Icon = weapon.Data.Icon
                         });
                         continue;
                     }
 
-                    if (weapon.IsMaxLevel) continue;
+                    if (weapon.IsMaxLevel)
+                    {
+                        if (weapon.CanEvolve(playerStats))
+                        {
+                            _candidatePool.Add(new UpgradeOption
+                            {
+                                IsWeaponUpgrade = true,
+                                IsNewWeaponUnlock = false,
+                                IsWeaponEvolution = true,
+                                TargetWeapon = weapon,
+                                Title = weapon.Data.EvolvedWeaponName,
+                                LevelText = "[TIẾN HÓA]",
+                                Description = weapon.Data.EvolvedDescription,
+                                Icon = weapon.Data.Icon
+                            });
+                        }
+                        continue;
+                    }
 
                     int nextLevel = weapon.CurrentLevel + 1;
                     WeaponLevelStats nextStats = weapon.Data.GetStats(nextLevel);
@@ -284,7 +315,7 @@ namespace SurvivorGame.Systems
                         TargetWeapon = weapon,
                         Title = weapon.Data.WeaponName,
                         LevelText = $"Cấp {weapon.CurrentLevel} -> {nextLevel}",
-                        Description = nextStats.upgradeDescription,
+                        Description = AppendWeaponEvolutionHint(nextStats.upgradeDescription, weapon.Data),
                         Icon = weapon.Data.Icon
                     });
                 }
@@ -308,11 +339,47 @@ namespace SurvivorGame.Systems
                         PassiveData = passive,
                         Title = passive.UpgradeName,
                         LevelText = currentLv == 0 ? "Mới (Cấp 1)" : $"Cấp {currentLv} -> {nextLv}",
-                        Description = passive.Description,
+                        Description = AppendPassiveEvolutionHint(passive.Description, passive, weapons),
                         Icon = passive.Icon
                     });
                 }
             }
+        }
+
+        private static string AppendWeaponEvolutionHint(string baseDescription, WeaponData data)
+        {
+            if (data == null || !data.HasEvolution || data.EvolutionCatalyst == null)
+            {
+                return baseDescription;
+            }
+
+            return $"{baseDescription}\n<size=78%><color=#FACC15>Tiến hóa với: {data.EvolutionCatalyst.UpgradeName}</color></size>";
+        }
+
+        private static string AppendPassiveEvolutionHint(
+            string baseDescription,
+            PassiveUpgradeData passive,
+            WeaponBase[] weapons)
+        {
+            if (passive == null || weapons == null) return baseDescription;
+
+            string matchedWeapons = null;
+            for (int i = 0; i < weapons.Length; i++)
+            {
+                WeaponBase weapon = weapons[i];
+                if (weapon == null || !weapon.gameObject.activeSelf || weapon.IsEvolved) continue;
+
+                WeaponData data = weapon.Data;
+                if (data == null || !data.HasEvolution || data.EvolutionCatalyst != passive) continue;
+
+                matchedWeapons = matchedWeapons == null
+                    ? data.WeaponName
+                    : $"{matchedWeapons}, {data.WeaponName}";
+            }
+
+            if (string.IsNullOrEmpty(matchedWeapons)) return baseDescription;
+
+            return $"{baseDescription}\n<size=78%><color=#FACC15>Tiến hóa: {matchedWeapons}</color></size>";
         }
 
         /// <summary>

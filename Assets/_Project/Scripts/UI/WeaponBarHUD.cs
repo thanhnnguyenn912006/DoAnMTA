@@ -29,6 +29,7 @@ namespace SurvivorGame.UI
         [SerializeField] private Sprite slotSprite;
         [SerializeField] private Material levelTextMaterial;
         [SerializeField] private Color weaponSlotBgColor = new Color(0.10f, 0.16f, 0.26f, 0.85f);
+        [SerializeField] private Color evolvedWeaponBgColor = new Color(0.361f, 0.255f, 0.078f, 0.92f); // #5C4114
         [SerializeField] private Color passiveSlotBgColor = new Color(0.20f, 0.14f, 0.28f, 0.85f);
         [SerializeField] private Color normalLevelColor = Color.white;
         [SerializeField] private Color maxLevelColor = new Color(1f, 0.84f, 0.31f, 1f);
@@ -111,12 +112,16 @@ namespace SurvivorGame.UI
                     WeaponBase weapon = weapons[i];
                     if (weapon == null || weapon.Data == null || !weapon.gameObject.activeSelf) continue;
 
+                    bool isEvolved = weapon.IsEvolved;
+                    string label = isEvolved ? "EVO" : (weapon.IsMaxLevel ? "MAX" : $"Lv.{weapon.CurrentLevel}");
+                    Color bgColor = isEvolved ? evolvedWeaponBgColor : weaponSlotBgColor;
+
                     SetSlot(
                         usedCount++,
                         weapon.Data.Icon,
-                        weapon.IsMaxLevel ? "MAX" : $"Lv.{weapon.CurrentLevel}",
-                        weaponSlotBgColor,
-                        weapon.IsMaxLevel);
+                        label,
+                        bgColor,
+                        isEvolved || weapon.IsMaxLevel);
                 }
             }
 
