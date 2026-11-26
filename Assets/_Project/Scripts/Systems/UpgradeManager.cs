@@ -280,7 +280,7 @@ namespace SurvivorGame.Systems
                             TargetWeapon = weapon,
                             Title = weapon.Data.WeaponName,
                             LevelText = "VŨ KHÍ MỚI (Cấp 1)",
-                            Description = AppendWeaponEvolutionHint(lv1Stats.upgradeDescription, weapon.Data),
+                            Description = AppendWeaponEvolutionHint(lv1Stats.upgradeDescription, weapon.Data, playerStats),
                             Icon = weapon.Data.Icon
                         });
                         continue;
@@ -299,7 +299,7 @@ namespace SurvivorGame.Systems
                                 Title = weapon.Data.EvolvedWeaponName,
                                 LevelText = "[TIẾN HÓA]",
                                 Description = weapon.Data.EvolvedDescription,
-                                Icon = weapon.Data.Icon
+                                Icon = weapon.Data.EvolvedIcon
                             });
                         }
                         continue;
@@ -315,7 +315,7 @@ namespace SurvivorGame.Systems
                         TargetWeapon = weapon,
                         Title = weapon.Data.WeaponName,
                         LevelText = $"Cấp {weapon.CurrentLevel} -> {nextLevel}",
-                        Description = AppendWeaponEvolutionHint(nextStats.upgradeDescription, weapon.Data),
+                        Description = AppendWeaponEvolutionHint(nextStats.upgradeDescription, weapon.Data, playerStats),
                         Icon = weapon.Data.Icon
                     });
                 }
@@ -346,9 +346,17 @@ namespace SurvivorGame.Systems
             }
         }
 
-        private static string AppendWeaponEvolutionHint(string baseDescription, WeaponData data)
+        private static string AppendWeaponEvolutionHint(
+            string baseDescription,
+            WeaponData data,
+            PlayerStats stats)
         {
             if (data == null || !data.HasEvolution || data.EvolutionCatalyst == null)
+            {
+                return baseDescription;
+            }
+
+            if (stats == null || stats.GetPassiveLevel(data.EvolutionCatalyst) < 1)
             {
                 return baseDescription;
             }

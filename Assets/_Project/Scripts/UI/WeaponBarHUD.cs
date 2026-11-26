@@ -115,10 +115,11 @@ namespace SurvivorGame.UI
                     bool isEvolved = weapon.IsEvolved;
                     string label = isEvolved ? "EVO" : (weapon.IsMaxLevel ? "MAX" : $"Lv.{weapon.CurrentLevel}");
                     Color bgColor = isEvolved ? evolvedWeaponBgColor : weaponSlotBgColor;
+                    Sprite slotIcon = isEvolved ? weapon.Data.EvolvedIcon : weapon.Data.Icon;
 
                     SetSlot(
                         usedCount++,
-                        weapon.Data.Icon,
+                        slotIcon,
                         label,
                         bgColor,
                         isEvolved || weapon.IsMaxLevel);

@@ -51,6 +51,7 @@ MonoBehaviour:
   hasEvolution: 1
   evolutionCatalyst: {fileID: 11400000, guid: de06b4e6666ab34488e4e2d26c4e75ad, type: 2}
   evolvedWeaponName: "Li\xEAn Thanh Xuy\xEAn Th\u1EA5u"
+  evolvedIcon: {fileID: -3717379111909028777, guid: 7a89cdd49f8859f42b41806de8b24605, type: 3}
   evolvedDescription: "Ti\u1EBFn h\xF3a: B\u1EAFn 3 vi\xEAn si\xEAu nhanh, s\xE1t th\u01B0\u01A1ng cao v\xE0 xuy\xEAn qua t\u1ED1i \u0111a 2 qu\xE1i"
   evolvedStats:
     damage: 55

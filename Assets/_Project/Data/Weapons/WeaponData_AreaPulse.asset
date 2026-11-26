@@ -51,6 +51,7 @@ MonoBehaviour:
   hasEvolution: 1
   evolutionCatalyst: {fileID: 11400000, guid: 7df58e658d953cc418886a39e2ad8c9e, type: 2}
   evolvedWeaponName: "Xung Ch\u1EA5n \u0110\u1EA9y L\xF9i"
+  evolvedIcon: {fileID: 1752463944517395291, guid: 3f07f77a8b5b4d74484a2c0a2099c3cc, type: 3}
   evolvedDescription: "Ti\u1EBFn h\xF3a: S\xF3ng xung k\xEDch c\u1EF1c r\u1ED9ng, h\u1ED3i nhanh v\xE0 \u0111\u1EA9y l\xF9i qu\xE1i th\u01B0\u1EDDng"
   evolvedStats:
     damage: 68

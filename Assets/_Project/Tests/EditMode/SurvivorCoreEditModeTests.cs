@@ -374,22 +374,28 @@ namespace SurvivorGame.Tests.EditMode
                     BindingFlags.Instance | BindingFlags.NonPublic);
                 Assert.IsNotNull(poolField);
 
-                // 1. Khi đã sở hữu vũ khí: thẻ vũ khí báo bị động ghép, thẻ bị động báo vũ khí đang có
+                // 1. Có vũ khí nhưng CHƯA có bị động: thẻ vũ khí KHÔNG hiện gợi ý; thẻ bị động HIỆN gợi ý cho vũ khí đang có
                 InvokeLifecycle(manager, "BuildCandidatePool");
                 var pool = (System.Collections.Generic.List<UpgradeOption>)poolField.GetValue(manager);
                 UpgradeOption weaponOpt = pool.Find(o => o.IsWeaponUpgrade);
                 UpgradeOption passiveOpt = pool.Find(o => !o.IsWeaponUpgrade);
 
-                StringAssert.Contains("Tiến hóa với: Tốc độ đánh", weaponOpt.Description);
+                StringAssert.DoesNotContain("Tiến hóa với:", weaponOpt.Description);
                 StringAssert.Contains("Tiến hóa: Đạn Tự Nhắm", passiveOpt.Description);
 
-                // 2. Khi chưa mở khóa vũ khí (inactive): thẻ bị động không báo tiến hóa vũ khí chưa có
+                // 2. Đã có bị động Cấp 1: thẻ vũ khí bắt đầu HIỆN gợi ý ghép với bị động đang có
+                Assert.IsTrue(stats.ApplyPassiveUpgrade(catalyst));
+                InvokeLifecycle(manager, "BuildCandidatePool");
+                weaponOpt = pool.Find(o => o.IsWeaponUpgrade);
+                StringAssert.Contains("Tiến hóa với: Tốc độ đánh", weaponOpt.Description);
+
+                // 3. Khi chưa mở khóa vũ khí (inactive): thẻ bị động không báo tiến hóa vũ khí chưa có
                 weaponObj.SetActive(false);
                 InvokeLifecycle(manager, "BuildCandidatePool");
                 passiveOpt = pool.Find(o => !o.IsWeaponUpgrade);
                 StringAssert.DoesNotContain("Tiến hóa:", passiveOpt.Description);
 
-                // 3. Khi vũ khí đã tiến hóa: thẻ bị động không còn hiện gợi ý tiến hóa nữa
+                // 4. Khi vũ khí đã tiến hóa: thẻ bị động không còn hiện gợi ý tiến hóa nữa
                 weaponObj.SetActive(true);
                 while (!weapon.IsMaxLevel) weapon.LevelUp();
                 Assert.IsTrue(weapon.Evolve());
@@ -403,6 +409,36 @@ namespace SurvivorGame.Tests.EditMode
                 Object.DestroyImmediate(playerObj);
                 Object.DestroyImmediate(weaponData);
                 Object.DestroyImmediate(catalyst);
+            }
+        }
+
+        [Test]
+        public void WeaponData_EvolvedIcon_UsesDedicatedSpriteWhenAssignedAndFallsBackToBaseIcon()
+        {
+            WeaponData weaponData = ScriptableObject.CreateInstance<WeaponData>();
+            Texture2D tex = new Texture2D(4, 4);
+            Sprite baseSprite = Sprite.Create(tex, new Rect(0, 0, 4, 4), new Vector2(0.5f, 0.5f));
+            Sprite evoSprite = Sprite.Create(tex, new Rect(0, 0, 4, 4), new Vector2(0.5f, 0.5f));
+            try
+            {
+                SerializedObject so = new SerializedObject(weaponData);
+                so.FindProperty("icon").objectReferenceValue = baseSprite;
+                so.FindProperty("evolvedIcon").objectReferenceValue = null;
+                so.ApplyModifiedPropertiesWithoutUndo();
+
+                Assert.AreSame(baseSprite, weaponData.EvolvedIcon);
+
+                so.FindProperty("evolvedIcon").objectReferenceValue = evoSprite;
+                so.ApplyModifiedPropertiesWithoutUndo();
+
+                Assert.AreSame(evoSprite, weaponData.EvolvedIcon);
+            }
+            finally
+            {
+                Object.DestroyImmediate(evoSprite);
+                Object.DestroyImmediate(baseSprite);
+                Object.DestroyImmediate(tex);
+                Object.DestroyImmediate(weaponData);
             }
         }
     }

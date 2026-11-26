@@ -25,6 +25,9 @@ namespace SurvivorGame.EditorTools
         private const string HealSpritePath = EffectsFolder + "/Pickup_Heal.png";
         private const string MagnetSpritePath = EffectsFolder + "/Pickup_Magnet.png";
         private const string MoveSpeedIconPath = "Assets/_Project/Art/Icons/Icon_MoveSpeed.png";
+        private const string AutoGunEvoIconPath = "Assets/_Project/Art/Icons/Icon_AutoGun_Evo.png";
+        private const string OrbitEvoIconPath = "Assets/_Project/Art/Icons/Icon_Orbit_Evo.png";
+        private const string AreaPulseEvoIconPath = "Assets/_Project/Art/Icons/Icon_AreaPulse_Evo.png";
 
         private const string BoxSpritePath = "Assets/_Project/Art/UI/UI_RoundedBox.png";
         private const string FillSpritePath = "Assets/_Project/Art/UI/UI_RoundedFill.png";
@@ -239,10 +242,15 @@ namespace SurvivorGame.EditorTools
             PassiveUpgradeData damagePassive,
             PassiveUpgradeData maxHealthPassive)
         {
+            Sprite autoGunEvoIcon = AssetDatabase.LoadAssetAtPath<Sprite>(AutoGunEvoIconPath);
+            Sprite orbitEvoIcon = AssetDatabase.LoadAssetAtPath<Sprite>(OrbitEvoIconPath);
+            Sprite areaPulseEvoIcon = AssetDatabase.LoadAssetAtPath<Sprite>(AreaPulseEvoIconPath);
+
             ConfigureSingleEvolution(
                 WeaponAutoGunPath,
                 cooldownPassive,
                 "Liên Thanh Xuyên Thấu",
+                autoGunEvoIcon,
                 "Tiến hóa: Bắn 3 viên siêu nhanh, sát thương cao và xuyên qua tối đa 2 quái",
                 new WeaponLevelStats
                 {
@@ -261,6 +269,7 @@ namespace SurvivorGame.EditorTools
                 WeaponOrbitPath,
                 damagePassive,
                 "Vòng Lưỡi Cưa Hỏa Lực",
+                orbitEvoIcon,
                 "Tiến hóa: 6 cầu lửa cỡ lớn xoay cực nhanh với bán kính rộng hơn",
                 new WeaponLevelStats
                 {
@@ -279,6 +288,7 @@ namespace SurvivorGame.EditorTools
                 WeaponAreaPulsePath,
                 maxHealthPassive,
                 "Xung Chấn Đẩy Lùi",
+                areaPulseEvoIcon,
                 "Tiến hóa: Sóng xung kích cực rộng, hồi nhanh và đẩy lùi quái thường",
                 new WeaponLevelStats
                 {
@@ -298,6 +308,7 @@ namespace SurvivorGame.EditorTools
             string assetPath,
             PassiveUpgradeData catalyst,
             string evolvedName,
+            Sprite evolvedIcon,
             string evolvedDesc,
             WeaponLevelStats stats,
             Color tintColor,
@@ -315,6 +326,7 @@ namespace SurvivorGame.EditorTools
             so.FindProperty("hasEvolution").boolValue = true;
             so.FindProperty("evolutionCatalyst").objectReferenceValue = catalyst;
             so.FindProperty("evolvedWeaponName").stringValue = evolvedName;
+            so.FindProperty("evolvedIcon").objectReferenceValue = evolvedIcon;
             so.FindProperty("evolvedDescription").stringValue = evolvedDesc;
 
             SerializedProperty statsProp = so.FindProperty("evolvedStats");

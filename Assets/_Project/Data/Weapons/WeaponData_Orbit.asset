@@ -51,6 +51,7 @@ MonoBehaviour:
   hasEvolution: 1
   evolutionCatalyst: {fileID: 11400000, guid: db0e8c4b32700fa4591c6d4b94ddb43d, type: 2}
   evolvedWeaponName: "V\xF2ng L\u01B0\u1EE1i C\u01B0a H\u1ECFa L\u1EF1c"
+  evolvedIcon: {fileID: -2122594414846187053, guid: f11b57858a24a2c4cbed47e4248e30a1, type: 3}
   evolvedDescription: "Ti\u1EBFn h\xF3a: 6 c\u1EA7u l\u1EEDa c\u1EE1 l\u1EDBn xoay c\u1EF1c nhanh v\u1EDBi b\xE1n k\xEDnh r\u1ED9ng h\u01A1n"
   evolvedStats:
     damage: 50
